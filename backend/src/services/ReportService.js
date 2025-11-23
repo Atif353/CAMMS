@@ -287,10 +287,12 @@ export const ReportService = {
             : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       };
     } catch (error) {
-      console.error("Python service error:", error);
+      console.error("Python service error:", error.message);
+      console.error("Note: PDF/Excel reports require Python 3 with pandas, matplotlib, and openpyxl installed.");
+      console.error("Falling back to JSON format. The system will continue to work normally.");
       return {
         data: summaryWithId,
-        error: "Python service unavailable, returning JSON data",
+        error: "Python service unavailable. PDF/Excel generation requires Python 3 with dependencies installed. Returning JSON data instead.",
       };
     }
   },

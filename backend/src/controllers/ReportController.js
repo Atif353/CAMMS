@@ -35,11 +35,18 @@ export const ReportController = {
           `attachment; filename="${result.filename}"`
         );
         res.setHeader('Content-Length', result.buffer.length);
-        // Ensure proper binary handling
         res.setHeader('Cache-Control', 'no-cache');
         res.send(result.buffer);
+      } else if (result.data) {
+        // Python unavailable - return JSON data instead
+        res.status(200).json({
+          success: true,
+          message: result.error || 'Report generated in JSON format (Python service unavailable)',
+          data: result.data,
+          format: 'json',
+        });
       } else {
-        // If file generation fails, return error (don't create duplicate record)
+        // If file generation fails completely
         res.status(500).json({
           success: false,
           message: result.error || 'Failed to generate report file',
@@ -76,11 +83,17 @@ export const ReportController = {
           `attachment; filename="${result.filename}"`
         );
         res.send(result.buffer);
-      } else {
+      } else if (result.data) {
         res.status(200).json({
           success: true,
-          message: result.error || 'Report data generated',
+          message: result.error || 'Report generated in JSON format (Python service unavailable)',
           data: result.data,
+          format: 'json',
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: result.error || 'Failed to generate report',
         });
       }
     } catch (error) {

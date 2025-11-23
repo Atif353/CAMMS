@@ -1,0 +1,7 @@
+[build]
+builder = "RAILPACK"
+image = "railway/railpack-node:python"
+
+[deploy]
+start = "npm start"
+

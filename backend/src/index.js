@@ -186,6 +186,39 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/upload", uploadRoutes);
 
+app.get("/python-test", async (req, res) => {
+  const { spawn } = await import("child_process");
+  const python = spawn("python3", ["--version"]);
+  let output = "";
+
+  python.stdout.on("data", (data) => (output += data.toString()));
+  python.stderr.on("data", (data) => (output += data.toString()));
+
+  python.on("close", (code) => {
+    if (code === 0) {
+      res.json({
+        success: true,
+        message: "Python is available",
+        version: output.trim(),
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "Python is not available",
+        output: output.trim(),
+      });
+    }
+  });
+
+  python.on("error", (error) => {
+    res.json({
+      success: false,
+      message: "Failed to spawn Python process",
+      error: error.message,
+    });
+  });
+});
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
@@ -193,11 +226,29 @@ const PORT = config.port;
 const HOST = process.env.HOST || "0.0.0.0"; // Railway requires binding to 0.0.0.0
 
 if (process.env.NODE_ENV !== "test") {
-  app.listen(PORT, HOST, () => {
+  app.listen(PORT, HOST, async () => {
     logger.info(`🚀 Server running on ${HOST}:${PORT}`);
     logger.info(`📊 Environment: ${config.nodeEnv}`);
     logger.info(`🔗 API: http://${HOST}:${PORT}/api`);
     logger.info(`📚 Swagger Docs: http://${HOST}:${PORT}/api-docs`);
+
+    const { spawn } = await import("child_process");
+    const pythonCmd = "python3";
+    const checkPython = spawn(pythonCmd, ["--version"], { stdio: "pipe" });
+    checkPython.on("close", (code) => {
+      if (code === 0) {
+        logger.info(`🐍 Python service: Available`);
+      } else {
+        logger.warn(
+          `⚠️  Python service: Not available - PDF/Excel reports will use JSON fallback`
+        );
+      }
+    });
+    checkPython.on("error", () => {
+      logger.warn(
+        `⚠️  Python service: Not available - PDF/Excel reports will use JSON fallback`
+      );
+    });
   });
 }
 

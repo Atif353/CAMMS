@@ -53,18 +53,34 @@ const InstructorReportsPage = () => {
         format: formData.format || 'pdf',
       });
 
-      const blob = response.data;
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      
-      a.href = url;
-      a.download = `report_${formData.reportType || 'CUSTOM'}_${new Date().toISOString().split('T')[0]}.${formData.format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      if (response.isJson && response.data.success) {
+        const jsonData = JSON.stringify(response.data.data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        a.href = url;
+        a.download = `report_${formData.reportType || 'CUSTOM'}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
 
-      toast.success(`Report downloaded as ${formData.format.toUpperCase()}`);
+        toast.warning(response.data.message || 'Report downloaded as JSON (Python service unavailable)');
+      } else {
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        a.href = url;
+        a.download = `report_${formData.reportType || 'CUSTOM'}_${new Date().toISOString().split('T')[0]}.${formData.format === 'pdf' ? 'pdf' : 'xlsx'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.success(`Report downloaded as ${formData.format.toUpperCase()}`);
+      }
       
       fetchPreviousReports();
     } catch (error) {
@@ -84,6 +100,23 @@ const InstructorReportsPage = () => {
       };
       
       const response = await reportApi.generateFile(dataToExport, format);
+
+      if (response.isJson && response.data.success) {
+        const jsonData = JSON.stringify(response.data.data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        a.href = url;
+        a.download = `report_${format}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.warning(response.data.message || 'Report downloaded as JSON (Python service unavailable)');
+        return;
+      }
 
       if (response.data instanceof Blob || response.data instanceof ArrayBuffer) {
         const blob = response.data instanceof Blob 
