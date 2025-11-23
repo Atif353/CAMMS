@@ -25,7 +25,6 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import fs from "fs";
-import path from "path";
 
 dotenv.config();
 
