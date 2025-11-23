@@ -45,6 +45,10 @@ try {
 
 const app = express();
 
+// Trust proxy - required for Railway to get correct protocol and host
+// This allows Express to read x-forwarded-proto and x-forwarded-host headers
+app.set("trust proxy", 1);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -80,6 +84,9 @@ app.use(
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
@@ -102,10 +109,29 @@ app.use(
 app.use("/api-docs", swaggerUi.serve);
 app.get("/api-docs", (req, res, next) => {
   // Dynamically set the server URL based on the current request
-  const protocol =
-    req.protocol || req.headers["x-forwarded-proto"]?.split(",")[0] || "https";
+  // Railway sets x-forwarded-proto header, and with trust proxy, req.protocol will be correct
+  let protocol = req.protocol;
+
+  // In production (Railway), always use HTTPS
+  if (config.nodeEnv === "production") {
+    protocol = "https";
+  } else {
+    // In development, use the detected protocol or default to http
+    const forwardedProto = req.headers["x-forwarded-proto"];
+    if (forwardedProto) {
+      protocol = forwardedProto.split(",")[0].trim();
+    } else if (!protocol) {
+      protocol = "http";
+    }
+  }
+
   const host = req.get("host") || req.headers.host;
   const baseUrl = `${protocol}://${host}`;
+
+  // Log for debugging (remove in production if needed)
+  if (config.nodeEnv === "development") {
+    logger.info(`Swagger UI: Using base URL: ${baseUrl}/api`);
+  }
 
   // Create a modified swagger spec with the current server URL
   const modifiedSpec = {
