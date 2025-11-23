@@ -146,7 +146,7 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
             {/* Square Logo */}
             <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 flex items-center justify-center shadow-lg flex-shrink-0">
               <img 
-                src="/assets/logo.png" 
+                src="/assets/logo.png"
                 alt="CAMMS" 
                 className="w-8 h-8 object-contain"
               />

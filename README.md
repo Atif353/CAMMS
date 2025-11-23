@@ -60,7 +60,7 @@ A comprehensive web-based application designed to streamline and automate daily 
 
 ## 📋 Prerequisites
 
-- **Node.js** (v18 or higher)
+- **Node.js** (v20 or higher)
 - **PostgreSQL** (v12 or higher)
 - **Python 3.8+** with pip
 - **npm** or **yarn**
@@ -101,8 +101,8 @@ npm install
 # DB_PASSWORD=your_password
 
 # JWT Configuration
-# JWT_SECRET=your-secret-key-here
-# JWT_REFRESH_SECRET=your-refresh-secret-key-here
+# JWT_SECRET=your-secret-key-here (min 32 characters)
+# JWT_REFRESH_SECRET=your-refresh-secret-key-here (min 32 characters)
 
 # Server Configuration
 # PORT=5000
@@ -136,6 +136,9 @@ cd frontend
 # Install dependencies
 npm install
 
+# Create .env file (optional for local development)
+# VITE_API_URL=http://localhost:5000/api
+
 # Start development server
 npm run dev
 ```
@@ -143,8 +146,6 @@ npm run dev
 Frontend will run on `http://localhost:3000`
 
 ## ⚡ Quick Start
-
-For a quick setup, follow these steps:
 
 ```bash
 # 1. Clone and navigate
@@ -220,57 +221,25 @@ camms/
 │   │   └── requirements.txt       # Python dependencies
 │   ├── src/
 │   │   ├── __tests__/             # Unit and integration tests
-│   │   │   ├── integration/       # API integration tests
-│   │   │   ├── services/          # Service unit tests
-│   │   │   └── utils/             # Utility tests
 │   │   ├── config/                 # Configuration files
-│   │   │   ├── __mocks__/         # Test mocks
-│   │   │   ├── prisma.js          # Prisma client
-│   │   │   ├── env.js             # Environment variables
-│   │   │   └── swagger.js         # API documentation
-│   │   ├── controllers/           # Request handlers
+│   │   ├── controllers/            # Request handlers
 │   │   ├── middleware/             # Auth, validation, error handling
 │   │   ├── models/                 # Database models (Prisma-based)
-│   │   │   └── __mocks__/         # Model mocks for testing
 │   │   ├── routes/                 # API routes with Swagger docs
 │   │   ├── services/               # Business logic
-│   │   ├── scripts/                # Database seeding and export scripts
-│   │   │   ├── seed.js            # Database seeding script
-│   │   │   └── exportMockData.js  # Export mock LMS dataset
+│   │   ├── scripts/                # Database seeding scripts
 │   │   └── utils/                  # Utilities (JWT, logger, date utils)
-│   │       └── __mocks__/         # Utility mocks for testing
-│   ├── jest.config.js              # Jest configuration
-│   ├── jest.setup.js                # Jest setup file
 │   └── package.json
-├── backend/
-│   └── exports/                    # Exported mock LMS datasets (CSV/JSON)
-├── USER_MANUAL.md                   # Comprehensive user manual
 ├── frontend/
-│   ├── public/                      # Static assets
-│   │   └── assets/                 # Images and media
+│   ├── public/                     # Static assets
 │   ├── src/
 │   │   ├── __tests__/              # Unit tests
 │   │   ├── api/                    # API client functions
 │   │   ├── components/             # Reusable components
-│   │   │   ├── Layout.jsx          # Main layout wrapper
-│   │   │   ├── Sidebar.jsx         # Navigation sidebar
-│   │   │   ├── Navbar.jsx          # Top navigation bar
-│   │   │   ├── DarkModeToggle.jsx  # Dark mode switcher
-│   │   │   └── ...                 # Other components
 │   │   ├── context/                 # React context providers
-│   │   │   └── AuthContext.jsx     # Authentication context
 │   │   ├── hooks/                   # Custom React hooks
-│   │   │   └── useDarkMode.js      # Dark mode hook
 │   │   ├── pages/                   # Page components
-│   │   │   ├── admin/              # Admin pages
-│   │   │   ├── instructor/         # Instructor pages
-│   │   │   ├── auth/               # Authentication pages
-│   │   │   └── ProfilePage.jsx      # User profile page
-│   │   ├── utils/                   # Utility functions
-│   │   ├── App.jsx                  # Main app component
-│   │   └── main.jsx                 # Application entry point
-│   ├── tailwind.config.js           # Tailwind CSS configuration
-│   ├── vite.config.js               # Vite configuration
+│   │   └── utils/                   # Utility functions
 │   └── package.json
 └── uploads/                          # Generated report files
 ```
@@ -286,12 +255,6 @@ npm run test:watch    # Watch mode
 npm run test:coverage # With coverage report
 ```
 
-**Test Coverage:**
-- Unit tests for services (Auth, Activity, Report, Notification, Dashboard)
-- Integration tests for API endpoints
-- Utility function tests
-- Mock implementations for Prisma and external dependencies
-
 ### Frontend Tests
 
 ```bash
@@ -299,12 +262,6 @@ cd frontend
 npm test              # Run all tests
 npm run test:coverage # With coverage report
 ```
-
-**Test Coverage:**
-- Component tests
-- Page tests
-- Utility and API tests
-- Context tests
 
 ## 📊 API Documentation
 
@@ -364,21 +321,6 @@ The Swagger UI provides:
 
 > **Note**: For detailed API documentation with request/response examples, visit the Swagger UI at `http://localhost:5000/api-docs`
 
-## 🐍 Python Reporting Service
-
-The system uses a Python service (running as a child process) for generating PDF and Excel reports using pandas and matplotlib. The service:
-
-- Generates professional PDF reports with charts and cover pages
-- Creates Excel reports with multiple sheets and styling
-- Runs internally without requiring a separate terminal
-- Supports both PDF and Excel export formats
-
-**Installation:**
-```bash
-cd backend/services
-pip install -r requirements.txt
-```
-
 ## 🗄️ Database Management
 
 ### Prisma Commands
@@ -400,9 +342,6 @@ npx prisma migrate reset
 
 # Seed database with sample data
 npm run seed
-
-# Export mock LMS dataset (CSV/JSON)
-npm run export:mock
 ```
 
 **Seed Script Details:**
@@ -414,13 +353,8 @@ npm run export:mock
 - Activities span **6 months** of historical data
 - All user IDs are **auto-generated UUIDs** (not sequential)
 - Realistic activity descriptions and metadata
-- Strong passwords following best practices: `Admin@2024#Secure` (admin) and `Instructor@2024#Secure` (instructors)
+- Strong passwords following best practices
 - Activity Status Distribution: 60% COMPLETED, 40% PENDING
-
-### Schema Management
-- Database schema is defined in `backend/prisma/schema.prisma`
-- All schema changes should be made through Prisma migrations
-- Never edit the database directly - use Prisma migrations
 
 ## ⚙️ System Settings
 
@@ -445,47 +379,6 @@ The application includes a comprehensive dark mode implementation:
 - **Full Coverage**: All components and pages support dark mode
 - **Smooth Transitions**: Animated theme switching
 
-## 🚢 Deployment
-
-**📖 For detailed free deployment instructions, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
-
-### Quick Deployment Summary
-
-#### Recommended Free Stack (2025):
-- **Frontend**: Vercel (Free) or Netlify (Free)
-- **Backend**: Render (Free) or Railway (Free)
-- **Database**: Supabase PostgreSQL (Free) or Neon (Free)
-
-#### Quick Steps:
-1. **Database**: Create Supabase project → Get connection string
-2. **Backend**: Deploy on Render → Add environment variables → Deploy
-   - **Note**: Python service runs internally (no separate deployment needed). Python dependencies are installed during build for PDF/Excel report generation.
-3. **Frontend**: Deploy on Vercel → Add `VITE_API_URL` → Deploy
-4. **Update CORS**: Add frontend URL to backend `FRONTEND_URL` environment variable
-
-### Environment Variables for Production
-
-#### Backend (.env)
-```env
-DATABASE_URL=postgresql://user:password@host:port/database
-JWT_SECRET=your-secret-key-here
-JWT_REFRESH_SECRET=your-refresh-secret-key-here
-NODE_ENV=production
-PORT=5000
-FRONTEND_URL=https://your-frontend.vercel.app
-```
-
-#### Frontend (.env.production)
-```env
-VITE_API_URL=https://your-backend.onrender.com/api
-```
-
-### Deployment Files
-- `backend/render.yaml` - Render deployment configuration
-- `frontend/vercel.json` - Vercel deployment configuration
-
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete step-by-step instructions.
-
 ## 📝 Environment Variables
 
 ### Backend (.env)
@@ -494,13 +387,13 @@ See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete step-by-step instr
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/camms_db
 # Or individual variables:
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=camms_db
-DB_USER=postgres
-DB_PASSWORD=your_password
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_NAME=camms_db
+# DB_USER=postgres
+# DB_PASSWORD=your_password
 
-# JWT
+# JWT (required, min 32 characters each)
 JWT_SECRET=your-secret-key-here
 JWT_REFRESH_SECRET=your-refresh-secret-key-here
 
@@ -508,8 +401,9 @@ JWT_REFRESH_SECRET=your-refresh-secret-key-here
 PORT=5000
 NODE_ENV=development
 
-# API
+# API (optional)
 API_URL=http://localhost:5000/api
+FRONTEND_URL=http://localhost:3000
 ```
 
 ### Frontend (.env)
@@ -518,44 +412,12 @@ API_URL=http://localhost:5000/api
 VITE_API_URL=http://localhost:5000/api
 ```
 
-## 📊 Mock LMS Dataset Export
-
-Export all database data to CSV and JSON formats for use as a mock LMS dataset:
-
-```bash
-cd backend
-npm run export:mock
-```
-
-This creates files in `backend/exports/`:
-- **CSV files**: `users.csv`, `activities.csv`, `activity_types.csv`, `roles.csv`, `system_settings.csv`, `notifications.csv`
-- **JSON files**: Individual JSON files for each table
-- **Combined**: `mock_lms_dataset.json` - Complete dataset in a single file
-
-The exported data can be used for:
-- Importing into other systems
-- Data analysis and reporting
-- Testing integrations
-- Creating backups
-- Academic demonstrations
-
-## 📖 User Manual
-
-A comprehensive user manual is available at `USER_MANUAL.md` covering:
-- Getting started guide
-- Admin features and workflows
-- Instructor features and workflows
-- System settings configuration
-- Troubleshooting guide
-- FAQs
-
 ## 🔍 Development Tools
 
 - **Prisma Studio**: Visual database browser - `npm run prisma:studio`
 - **Swagger UI**: Interactive API documentation - `http://localhost:5000/api-docs`
 - **Test Coverage**: Run `npm run test:coverage` in both backend and frontend
 - **Dark Mode**: Toggle available in navbar for testing UI in both themes
-- **Mock Data Export**: Export database to CSV/JSON - `npm run export:mock`
 
 ## 📞 Support
 

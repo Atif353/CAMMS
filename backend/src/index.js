@@ -54,32 +54,28 @@ app.use(
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
-// CORS configuration - allow production and development origins
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://localhost:5173", // Vite default dev port
+  "http://localhost:5173",
   config.frontendUrl,
-].filter(Boolean); // Remove undefined values
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      // In development, allow all origins for easier testing
       if (config.nodeEnv === "development") {
         return callback(null, true);
       }
 
-      // In production, check against allowed origins
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
+      } else if (origin && origin.includes("vercel.app")) {
+        callback(null, true);
+      } else if (origin && origin.includes("netlify.app")) {
+        callback(null, true);
       } else {
-        // For Swagger UI and API testing, allow requests from the same server
-        // This is safe because Swagger UI is served from the same origin
-        // In a production API, you typically want to allow API access from anywhere
-        // but restrict based on authentication tokens instead
         callback(null, true);
       }
     },

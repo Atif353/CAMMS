@@ -51,19 +51,9 @@ const SignupPage = () => {
             <div className="flex justify-center mb-4">
               <div className="w-20 h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-xl overflow-hidden">
                 <img 
-                  src="/assets/logo.png" 
+                  src="/assets/logo.png"
                   alt="CAMMS Logo" 
                   className="w-full h-full object-contain p-3"
-                  loading="eager"
-                  onError={(e) => {
-                    console.error('Logo failed to load, trying alternative path');
-                    // Try alternative path
-                    e.target.src = './assets/logo.png';
-                    e.target.onerror = () => {
-                      console.error('Logo failed to load from alternative path');
-                      e.target.style.display = 'none';
-                    };
-                  }}
                 />
               </div>
             </div>
