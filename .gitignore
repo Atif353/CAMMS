@@ -41,10 +41,17 @@ coverage/
 backend/exports/
 frontend/exports/
 
-# User uploads
+# User uploads (runtime uploads - keep ignored)
 uploads/
 backend/uploads/
-frontend/uploads/
+# Allow frontend/public/ static assets (logo.png, background.png, etc.)
+# But ignore runtime profile images
+frontend/public/assets/profile-images/
+frontend/public/assets/profile-*.jpg
+frontend/public/assets/profile-*.webp
+frontend/public/assets/profile-*.png
+!frontend/public/assets/logo.png
+!frontend/public/assets/background.png
 
 # IDE
 .vscode/
@@ -137,7 +144,8 @@ dist/
 
 # Gatsby files
 .cache/
-public
+# public - Allow frontend/public/ folder (contains static assets like logos)
+# frontend/public/ should be tracked in git
 
 # Storybook build outputs
 .out

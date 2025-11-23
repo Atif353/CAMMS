@@ -34,9 +34,10 @@ postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
   - [ ] Name: `camms-backend`
   - [ ] Environment: `Node`
   - [ ] Root Directory: `backend`
-  - [ ] Build Command: `npm install && npm run prisma:generate`
+  - [ ] Build Command: `npm install && npm run prisma:generate && (python3 -m pip install --user pandas matplotlib openpyxl || echo "Python deps skipped")`
   - [ ] Start Command: `npm start`
   - [ ] Plan: Free
+  - [ ] Note: Python is for PDF/Excel reports (optional - JSON fallback available)
 - [ ] Add Environment Variables:
   - [ ] `NODE_ENV=production`
   - [ ] `DATABASE_URL` (from Supabase)
@@ -81,7 +82,9 @@ postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 - [ ] Verify dashboard loads
 - [ ] Test creating an activity
 - [ ] Test editing an activity
-- [ ] Test generating a report
+- [ ] Test generating a report (PDF/Excel - Python service runs internally)
+  - [ ] If Python works: Reports download as PDF/Excel
+  - [ ] If Python unavailable: Reports return as JSON (still functional)
 - [ ] Test notifications
 - [ ] Test dark mode toggle
 - [ ] Check browser console for errors

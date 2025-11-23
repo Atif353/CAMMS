@@ -459,6 +459,7 @@ The application includes a comprehensive dark mode implementation:
 #### Quick Steps:
 1. **Database**: Create Supabase project → Get connection string
 2. **Backend**: Deploy on Render → Add environment variables → Deploy
+   - **Note**: Python service runs internally (no separate deployment needed). Python dependencies are installed during build for PDF/Excel report generation.
 3. **Frontend**: Deploy on Vercel → Add `VITE_API_URL` → Deploy
 4. **Update CORS**: Add frontend URL to backend `FRONTEND_URL` environment variable
 

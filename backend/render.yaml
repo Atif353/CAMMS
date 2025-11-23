@@ -4,7 +4,8 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install && npm run prisma:generate
+    # Install Node.js dependencies, generate Prisma client, and Python dependencies
+    buildCommand: npm install && npm run prisma:generate && (python3 -m pip install --user pandas matplotlib openpyxl || pip3 install --user pandas matplotlib openpyxl || echo "Python dependencies installation skipped - reports will use JSON fallback")
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -16,4 +17,5 @@ services:
       # DATABASE_URL (from Supabase/Neon)
       # JWT_SECRET (generate a strong secret)
       # JWT_REFRESH_SECRET (generate a strong secret)
+      # FRONTEND_URL (your frontend deployment URL)
 
