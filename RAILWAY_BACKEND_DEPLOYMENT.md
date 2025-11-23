@@ -164,26 +164,32 @@ FRONTEND_URL=https://your-frontend.vercel.app
 **This means Railway is using the wrong builder (frontend instead of Node.js)**
 
 **Solution**:
-1. **Check if configuration files exist**:
-   - `backend/nixpacks.toml` should exist
-   - `backend/railway.json` should exist
-   - If not, create them (see files in repository)
-
-2. **Commit and push the configuration files**:
-   ```bash
-   git add backend/nixpacks.toml backend/railway.json
-   git commit -m "Add Railway configuration files"
-   git push
-   ```
-
-3. **In Railway Settings**:
+1. **Ensure Nixpacks is selected** (You should see "Using Nixpacks" in logs):
    - Go to **Settings** → **Build**
    - Ensure **Nixpacks Provider** is set to `NIXPACKS` (not Railpack Frontend)
    - If you see "Railpack Frontend", change it to `NIXPACKS`
 
+2. **Check configuration files exist**:
+   - `backend/nixpacks.toml` - Should specify Node.js 20 (latest LTS)
+   - `backend/.nvmrc` - Specifies Node.js version
+   - `backend/railway.json` - Railway configuration
+   - `backend/Procfile` - Process file
+   - All should be in your repository
+
+3. **If still getting "npm: not found"**:
+   - The nixpacks.toml might not be loading correctly
+   - Try adding `.nvmrc` file with `18` in it
+   - Commit and push:
+     ```bash
+     git add backend/nixpacks.toml backend/.nvmrc backend/Procfile
+     git commit -m "Fix Railway Nixpacks configuration for Node.js"
+     git push
+     ```
+
 4. **Redeploy**:
    - Railway will automatically redeploy after you push
    - Or manually trigger: **Deployments** → **Redeploy**
+   - Check logs to see if Node.js is being installed
 
 ### Service Won't Start
 
