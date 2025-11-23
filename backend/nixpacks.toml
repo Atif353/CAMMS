@@ -1,3 +1,6 @@
+[providers]
+nixpacks = true
+
 [phases.setup]
 nixPkgs = ["nodejs-18_x", "python3"]
 

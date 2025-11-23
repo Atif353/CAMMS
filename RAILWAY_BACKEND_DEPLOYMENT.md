@@ -46,15 +46,28 @@ Railway will automatically:
 
 ### Step 4: Configure Build Settings
 
-**Important**: Railway might detect your project as frontend. To force Node.js backend:
+**CRITICAL**: Railway is detecting your project as frontend. You MUST fix this:
 
-1. **Option A: Use Configuration Files** (Recommended)
-   - The `backend/nixpacks.toml` and `backend/railway.json` files are already created
-   - These force Railway to use Node.js runtime
-   - Commit and push these files to your repository
-   - Railway will automatically use them
+1. **In Railway Dashboard** (Do this FIRST):
+   - Go to your service → **Settings** → **Build**
+   - Look for **"Nixpacks Provider"** or **"Builder"** setting
+   - Change it from **"Railpack Frontend"** to **"NIXPACKS"**
+   - Click **"Save"**
+   - This will trigger a new deployment with the correct builder
 
-2. **Option B: Manual Settings**
+2. **Configuration Files** (Already created):
+   - `backend/nixpacks.toml` - Forces Nixpacks with Node.js
+   - `backend/railway.json` - Railway configuration
+   - `backend/Procfile` - Process file for Railway
+   - `backend/package.json` - Now includes engines specification
+   - **Commit and push these files**:
+     ```bash
+     git add backend/nixpacks.toml backend/railway.json backend/Procfile backend/package.json
+     git commit -m "Add Railway configuration files to force Node.js runtime"
+     git push
+     ```
+
+3. **Manual Settings** (If still not working):
    - Go to **Settings** → **Build**
    - **Build Command**:
      ```
@@ -64,10 +77,10 @@ Railway will automatically:
      ```
      npm start
      ```
-   - **Nixpacks Provider**: Ensure it's set to `NIXPACKS` (not Railpack Frontend)
+   - **Nixpacks Provider**: MUST be set to `NIXPACKS` (not Railpack Frontend)
    - Click **"Save"**
 
-**Note**: If you see "npm: not found" error, Railway is using the wrong builder. The configuration files will fix this.
+**IMPORTANT**: The manual change in Railway dashboard (Step 1) is the quickest fix. Do that first!
 
 ### Step 5: Add Environment Variables
 

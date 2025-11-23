@@ -4,6 +4,10 @@
   "description": "Course Activity Management and Monitoring System - Backend",
   "main": "src/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
