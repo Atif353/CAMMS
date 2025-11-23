@@ -15,7 +15,7 @@ COPY services/requirements.txt ./services/
 RUN npm ci
 
 # Install Python dependencies
-# Use --break-system-packages since this is a container and we control the environment
+# Use --break-system-packages to bypass PEP 668 protection in Docker container
 RUN python3 -m pip install --break-system-packages -r services/requirements.txt
 
 # Copy application code
