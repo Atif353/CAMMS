@@ -1,7 +1,6 @@
 [build]
-builder = "RAILPACK"
-image = "railway/railpack-node:python"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 start = "npm start"
-

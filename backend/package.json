@@ -21,8 +21,8 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "postinstall": "python3 -m pip install -r services/requirements.txt || true",
-    "setup:python": "python3 -m pip install -r services/requirements.txt || echo 'Python dependencies installation skipped'"
+    "postinstall": "python3 -m ensurepip --user --default-pip 2>/dev/null || python3 -m pip --version 2>/dev/null || echo 'pip not available'; python3 -m pip install --user -r services/requirements.txt 2>/dev/null || echo 'Python dependencies installation skipped - pip may not be installed'",
+    "setup:python": "python3 -m pip install --user -r services/requirements.txt || echo 'Python dependencies installation skipped'"
   },
   "keywords": [
     "lms",
