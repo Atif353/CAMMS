@@ -2,6 +2,10 @@
 
 A comprehensive web-based application designed to streamline and automate daily tasks performed by instructors in an LMS-based environment. The system tracks activities such as MDB replies, ticket responses, assignment uploads and marking, GDB marking, and email handling, while generating detailed performance reports.
 
+## 🌐 Live Demo
+
+- **Development Environment**: [https://camms-dev.vercel.app/](https://camms-dev.vercel.app/)
+
 ## 🚀 Features
 
 ### Admin Features
