@@ -35,14 +35,25 @@ Railway will automatically:
 
 ### Step 3: Configure the Service
 
+**🚨 CRITICAL - DO THIS FIRST!**
+
 1. **Railway will create a service automatically**
 2. Click on the service to open settings
 3. Go to **Settings** tab
-4. **Set Root Directory**:
-   - Scroll to **"Source"** section
-   - Set **Root Directory**: `backend`
-   - This tells Railway to deploy from the `backend` folder
+4. **Set Root Directory** (MOST IMPORTANT!):
+   - Scroll to **"Source"** section (NOT "Watch Paths" - that's different!)
+   - Find **"Root Directory"** field
+   - **Set it to**: `backend` (type exactly: `backend`)
+   - This tells Railway to ONLY look in the `backend` folder for building
+   - **Without this, Railway looks at root and fails!**
    - Click **"Save"**
+   - Railway will automatically redeploy
+
+**⚠️ IMPORTANT**: 
+- **Watch Paths** = Which files trigger redeployments (you might already have `backend` here)
+- **Root Directory** = Which folder to use for building (THIS is what you need to set!)
+
+**Why this is critical**: Railway defaults to root directory. Since you have both `frontend/` and `backend/` folders, Railway gets confused. Setting Root Directory to `backend` fixes this.
 
 ### Step 4: Configure Build Settings
 
@@ -153,6 +164,25 @@ FRONTEND_URL=https://your-frontend.vercel.app
    - Check **Logs** for any errors
 
 ## 🔧 Troubleshooting
+
+### "Nixpacks build failed" or "Unable to generate build plan"
+
+**This usually means Root Directory is NOT set correctly!**
+
+**Solution**:
+1. **Check Root Directory** (MOST COMMON ISSUE):
+   - Go to **Settings** → **Source**
+   - **Root Directory MUST be set to**: `backend`
+   - If it's empty or set to `/`, Railway looks at root and fails
+   - Set it to `backend` and save
+
+2. **Verify package.json is in backend folder**:
+   - Railway needs to find `backend/package.json`
+   - If Root Directory is wrong, it won't find it
+
+3. **After fixing Root Directory**:
+   - Railway will auto-redeploy
+   - Should now detect Node.js project correctly
 
 ### "npm: not found" Error
 
