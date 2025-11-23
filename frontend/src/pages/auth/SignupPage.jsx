@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FiUser, FiMail, FiLock, FiUserPlus, FiPhone, FiArrowRight, FiCheck, FiEye, FiEyeOff } from 'react-icons/fi';
+import logoImage from '/assets/logo.png';
+import backgroundImage from '/assets/background.png';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +41,7 @@ const SignupPage = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('/assets/background.png')`,
+          backgroundImage: `url(${backgroundImage})`,
         }}
       />
       
@@ -51,7 +53,7 @@ const SignupPage = () => {
             <div className="flex justify-center mb-4">
               <div className="w-20 h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-xl overflow-hidden">
                 <img 
-                  src="/assets/logo.png" 
+                  src={logoImage} 
                   alt="CAMMS Logo" 
                   className="w-full h-full object-contain p-3"
                 />
