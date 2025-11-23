@@ -1,8 +1,7 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm install && npm run prisma:generate && (python3 -m pip install --user pandas matplotlib openpyxl || echo 'Python deps skipped')"
+    "builder": "NIXPACKS"
   },
   "deploy": {
     "startCommand": "npm start",

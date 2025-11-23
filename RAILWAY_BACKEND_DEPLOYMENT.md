@@ -46,41 +46,36 @@ Railway will automatically:
 
 ### Step 4: Configure Build Settings
 
-**CRITICAL**: Railway is detecting your project as frontend. You MUST fix this:
+**CRITICAL FIX FOR "npm: not found" ERROR:**
 
-1. **In Railway Dashboard** (Do this FIRST):
+1. **In Railway Dashboard** (Do this FIRST - MOST IMPORTANT!):
    - Go to your service → **Settings** → **Build**
-   - Look for **"Nixpacks Provider"** or **"Builder"** setting
-   - Change it from **"Railpack Frontend"** to **"NIXPACKS"**
+   - **CLEAR/DELETE the Build Command field** (leave it empty!)
+   - **CLEAR/DELETE the Start Command field** (leave it empty!)
+   - Set **"Nixpacks Provider"** to **"NIXPACKS"** (not Railpack Frontend)
    - Click **"Save"**
-   - This will trigger a new deployment with the correct builder
+   - **Why**: Manual build commands override `nixpacks.toml`. Clearing them forces Railway to use the config file.
 
-2. **Configuration Files** (Already created):
-   - `backend/nixpacks.toml` - Forces Nixpacks with Node.js
-   - `backend/railway.json` - Railway configuration
-   - `backend/Procfile` - Process file for Railway
-   - `backend/package.json` - Now includes engines specification
-   - **Commit and push these files**:
+2. **Configuration Files** (Already created - commit these):
+   - `backend/nixpacks.toml` - Handles Node.js installation and build
+   - `backend/.nvmrc` - Specifies Node.js 20
+   - `backend/railway.json` - Specifies NIXPACKS builder (no buildCommand)
+   - `backend/Procfile` - Process file
+   - `backend/package.json` - Includes engines specification
+   
+   **Commit and push**:
      ```bash
-     git add backend/nixpacks.toml backend/railway.json backend/Procfile backend/package.json
-     git commit -m "Add Railway configuration files to force Node.js runtime"
+     git add backend/nixpacks.toml backend/.nvmrc backend/railway.json backend/Procfile backend/package.json
+     git commit -m "Fix Railway: Use nixpacks.toml for build (clear manual commands)"
      git push
      ```
 
-3. **Manual Settings** (If still not working):
-   - Go to **Settings** → **Build**
-   - **Build Command**:
-     ```
-     npm install && npm run prisma:generate && (python3 -m pip install --user pandas matplotlib openpyxl || echo "Python deps skipped")
-     ```
-   - **Start Command**:
-     ```
-     npm start
-     ```
-   - **Nixpacks Provider**: MUST be set to `NIXPACKS` (not Railpack Frontend)
-   - Click **"Save"**
+3. **Verify**:
+   - After pushing, Railway will auto-redeploy
+   - Check build logs - you should see Node.js being installed
+   - npm commands should work now
 
-**IMPORTANT**: The manual change in Railway dashboard (Step 1) is the quickest fix. Do that first!
+**KEY POINT**: Railway will use `nixpacks.toml` ONLY if you don't set manual build commands. That's why clearing them is critical!
 
 ### Step 5: Add Environment Variables
 

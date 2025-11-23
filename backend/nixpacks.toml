@@ -1,10 +1,14 @@
 [providers]
 nixpacks = true
 
+[variables]
+NODE_VERSION = "20"
+
 [phases.setup]
 nixPkgs = ["nodejs-20_x", "python3"]
 
 [phases.install]
+dependsOn = ["setup"]
 cmds = [
   "npm install",
   "npm run prisma:generate",
