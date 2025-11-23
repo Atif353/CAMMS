@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: camms-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run prisma:generate
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # Add these in Render dashboard:
+      # DATABASE_URL (from Supabase/Neon)
+      # JWT_SECRET (generate a strong secret)
+      # JWT_REFRESH_SECRET (generate a strong secret)
+
