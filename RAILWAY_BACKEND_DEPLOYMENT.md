@@ -1,0 +1,311 @@
+# Railway Backend Deployment Guide - Step by Step
+
+This guide will walk you through deploying your CAMMS backend on Railway.
+
+## ✅ Why Railway?
+
+- ✅ **Supports private GitHub repositories** (no need to make repo public!)
+- ✅ $5 free credit/month (generous for small projects)
+- ✅ Automatic SSL certificates
+- ✅ Simple setup process
+- ✅ Auto-deploy from GitHub
+- ✅ Easy environment variable management
+
+## 🚀 Step-by-Step Deployment
+
+### Step 1: Sign Up for Railway
+
+1. Go to: **https://railway.app**
+2. Click **"Start a New Project"** or **"Login"**
+3. Sign up with **GitHub** (recommended - easiest way)
+4. Authorize Railway to access your repositories
+5. You'll be redirected to the Railway dashboard
+
+### Step 2: Create New Project
+
+1. In Railway dashboard, click **"New Project"**
+2. Select **"Deploy from GitHub repo"**
+3. **Search for your repository** (your private repo will appear!)
+4. **Select your CAMMS repository**
+5. Click **"Deploy Now"**
+
+Railway will automatically:
+- Detect it's a Node.js project
+- Start the deployment process
+
+### Step 3: Configure the Service
+
+1. **Railway will create a service automatically**
+2. Click on the service to open settings
+3. Go to **Settings** tab
+4. **Set Root Directory**:
+   - Scroll to **"Source"** section
+   - Set **Root Directory**: `backend`
+   - This tells Railway to deploy from the `backend` folder
+   - Click **"Save"**
+
+### Step 4: Configure Build Settings
+
+**Important**: Railway might detect your project as frontend. To force Node.js backend:
+
+1. **Option A: Use Configuration Files** (Recommended)
+   - The `backend/nixpacks.toml` and `backend/railway.json` files are already created
+   - These force Railway to use Node.js runtime
+   - Commit and push these files to your repository
+   - Railway will automatically use them
+
+2. **Option B: Manual Settings**
+   - Go to **Settings** → **Build**
+   - **Build Command**:
+     ```
+     npm install && npm run prisma:generate && (python3 -m pip install --user pandas matplotlib openpyxl || echo "Python deps skipped")
+     ```
+   - **Start Command**:
+     ```
+     npm start
+     ```
+   - **Nixpacks Provider**: Ensure it's set to `NIXPACKS` (not Railpack Frontend)
+   - Click **"Save"**
+
+**Note**: If you see "npm: not found" error, Railway is using the wrong builder. The configuration files will fix this.
+
+### Step 5: Add Environment Variables
+
+1. Go to your service → **Variables** tab
+2. Click **"New Variable"** for each variable below:
+
+#### Required Environment Variables:
+
+```
+NODE_ENV=production
+```
+
+```
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres?sslmode=require
+```
+**Note**: Get this from your Supabase project settings → Database → Connection string
+
+```
+JWT_SECRET=your-strong-secret-key-here
+```
+**Generate a strong secret** (at least 32 characters):
+- Use: `openssl rand -base64 32`
+- Or use an online generator: https://randomkeygen.com/
+
+```
+JWT_REFRESH_SECRET=your-strong-refresh-secret-here
+```
+**Generate another strong secret** (different from JWT_SECRET)
+
+```
+PORT=5000
+```
+
+```
+FRONTEND_URL=https://your-frontend.vercel.app
+```
+**Note**: Add this after you deploy the frontend. Update it with your actual Vercel URL.
+
+3. **After adding each variable**, Railway will automatically redeploy
+4. Wait for the deployment to complete
+
+### Step 6: Get Your Backend URL
+
+1. Go to your service → **Settings** → **Networking**
+2. Your backend URL will be displayed, something like:
+   ```
+   https://your-project-name.up.railway.app
+   ```
+3. **Copy this URL** - you'll need it for:
+   - Frontend `VITE_API_URL` environment variable
+   - Testing the deployment
+
+### Step 7: Test Your Deployment
+
+1. **Test Health Endpoint**:
+   Visit: `https://your-project-name.up.railway.app/health`
+   
+   Should return:
+   ```json
+   {
+     "success": true,
+     "message": "CAMMS API is running",
+     "timestamp": "2025-11-23T..."
+   }
+   ```
+
+2. **Test API Docs**:
+   Visit: `https://your-project-name.up.railway.app/api-docs`
+   
+   Should show Swagger API documentation
+
+3. **Check Logs**:
+   - Go to your service → **Deployments** tab
+   - Click on the latest deployment
+   - Check **Logs** for any errors
+
+## 🔧 Troubleshooting
+
+### "npm: not found" Error
+
+**This means Railway is using the wrong builder (frontend instead of Node.js)**
+
+**Solution**:
+1. **Check if configuration files exist**:
+   - `backend/nixpacks.toml` should exist
+   - `backend/railway.json` should exist
+   - If not, create them (see files in repository)
+
+2. **Commit and push the configuration files**:
+   ```bash
+   git add backend/nixpacks.toml backend/railway.json
+   git commit -m "Add Railway configuration files"
+   git push
+   ```
+
+3. **In Railway Settings**:
+   - Go to **Settings** → **Build**
+   - Ensure **Nixpacks Provider** is set to `NIXPACKS` (not Railpack Frontend)
+   - If you see "Railpack Frontend", change it to `NIXPACKS`
+
+4. **Redeploy**:
+   - Railway will automatically redeploy after you push
+   - Or manually trigger: **Deployments** → **Redeploy**
+
+### Service Won't Start
+
+**Check Logs**:
+1. Go to **Deployments** tab
+2. Click on the latest deployment
+3. Check **Build Logs** and **Deploy Logs**
+4. Look for error messages
+
+**Common Issues**:
+- **"Cannot find module"**: Check if all dependencies are in `package.json`
+- **"Prisma client not generated"**: Ensure build command includes `npm run prisma:generate`
+- **"Port already in use"**: Railway sets PORT automatically, don't hardcode it
+- **"npm: not found"**: Railway is using wrong builder - use configuration files above
+
+### Database Connection Fails
+
+**Check**:
+1. Verify `DATABASE_URL` includes `?sslmode=require`
+2. Ensure Supabase database is active (not paused)
+3. Test connection string locally first
+4. Check Railway logs for specific database errors
+
+### Build Fails
+
+**Check**:
+1. Verify Root Directory is set to `backend`
+2. Check if `package.json` exists in backend folder
+3. Ensure Node.js version is compatible (Railway auto-detects)
+4. Check build logs for specific errors
+
+### Python Dependencies Not Installing
+
+**Not Critical**:
+- Reports will fall back to JSON format automatically
+- System remains fully functional
+- Check build logs if you want to debug
+
+## 📊 Railway Free Tier Limits
+
+- ✅ **$5 free credit/month** (very generous)
+- ✅ **512 MB RAM** per service
+- ✅ **1 GB storage**
+- ✅ **100 GB bandwidth/month**
+- ✅ **Private repository support**
+- ✅ **Automatic SSL**
+- ✅ **Auto-deploy from GitHub**
+
+**Note**: $5 credit is usually enough for a small backend running 24/7. Railway will notify you if you're approaching limits.
+
+## 💡 Pro Tips
+
+1. **Monitor Usage**: 
+   - Check Railway dashboard → **Usage** tab
+   - See how much credit you're using
+
+2. **Auto-Deploy**: 
+   - Railway automatically deploys on every git push
+   - Very convenient for updates
+
+3. **Logs**: 
+   - Check **Logs** tab for real-time application logs
+   - Useful for debugging
+
+4. **Custom Domain**: 
+   - You can add a custom domain in **Settings** → **Networking**
+   - Free SSL included
+
+5. **Environment Variables**: 
+   - Keep a secure backup of all environment variables
+   - Use a password manager
+
+6. **Database Migrations**: 
+   - Run migrations manually after deployment:
+   ```bash
+   # Connect to Railway service via CLI or use Railway's web terminal
+   npm run prisma:migrate:deploy
+   ```
+
+## 🎯 Quick Checklist
+
+- [ ] Signed up on Railway with GitHub
+- [ ] Created new project from GitHub repo
+- [ ] Set Root Directory to `backend`
+- [ ] Added all environment variables:
+  - [ ] `NODE_ENV=production`
+  - [ ] `DATABASE_URL` (with `?sslmode=require`)
+  - [ ] `JWT_SECRET` (strong secret)
+  - [ ] `JWT_REFRESH_SECRET` (strong secret)
+  - [ ] `PORT=5000`
+  - [ ] `FRONTEND_URL` (add after frontend deployment)
+- [ ] Service is running (check status)
+- [ ] Health endpoint works: `/health`
+- [ ] Backend URL copied for frontend configuration
+
+## 🔗 Next Steps
+
+After Railway deployment:
+
+1. **Deploy Frontend on Vercel**:
+   - Use the same GitHub repository
+   - Set Root Directory to `frontend`
+   - Add `VITE_API_URL=https://your-railway-url.up.railway.app/api`
+
+2. **Update Backend CORS**:
+   - Go back to Railway → Variables
+   - Update `FRONTEND_URL` with your Vercel URL
+   - Railway will auto-redeploy
+
+3. **Test Complete System**:
+   - Visit frontend URL
+   - Try logging in
+   - Test all features
+
+## 📝 Environment Variables Summary
+
+Copy-paste ready list (replace values):
+
+```
+NODE_ENV=production
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@db.YOUR_PROJECT.supabase.co:5432/postgres?sslmode=require
+JWT_SECRET=generate-with-openssl-rand-base64-32
+JWT_REFRESH_SECRET=generate-another-secret-here
+PORT=5000
+FRONTEND_URL=https://your-frontend.vercel.app
+```
+
+## 🆘 Still Having Issues?
+
+1. **Check Railway Status**: https://status.railway.app
+2. **Review Logs**: Check deployment and runtime logs
+3. **Test Locally**: Ensure everything works locally first
+4. **Railway Discord**: Join Railway's Discord for community support
+
+---
+
+**Railway makes deployment easy! Your backend should be live in minutes.** 🚀
+

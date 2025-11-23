@@ -105,6 +105,8 @@ Before deploying, ensure:
 - ✅ Auto-deploy from GitHub
 - ✅ Simple setup process
 
+**📖 For detailed Railway deployment instructions, see [RAILWAY_BACKEND_DEPLOYMENT.md](./RAILWAY_BACKEND_DEPLOYMENT.md)**
+
 ### Option B: Render (Requires Public Repo) ⚠️
 
 **Why Render?**
