@@ -16,19 +16,8 @@ import {
   FiUser,
   FiChevronLeft,
   FiChevronRight,
+  FiActivity,
 } from 'react-icons/fi';
-
-/**
- * PROFESSIONAL SIDEBAR COMPONENT
- * 
- * Features for viva:
- * - Modern, clean design
- * - Dark mode support
- * - Collapsible sidebar
- * - Square logo container
- * - Notification badges
- * - Smooth animations
- */
 
 const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
   const location = useLocation();
@@ -120,7 +109,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -128,7 +116,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
         />
       )}
       
-      {/* Sidebar Container */}
       <div className={`
         fixed left-0 top-0 h-full z-50 flex flex-col
         bg-white dark:bg-gray-900
@@ -140,28 +127,20 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
         md:translate-x-0
       `}>
         
-        {/* Header Section */}
         <div className="relative p-5 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            {/* Square Logo */}
-            <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 flex items-center justify-center shadow-lg flex-shrink-0">
-              <img 
-                src="/assets/logo.png"
-                alt="CAMMS" 
-                className="w-8 h-8 object-contain"
-              />
+            <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-700 flex items-center justify-center shadow-lg flex-shrink-0 transform hover:scale-105 transition-transform duration-300">
+              <FiActivity className="w-6 h-6 text-white" />
             </div>
             
-            {/* Title */}
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white dark:text-white truncate">CAMMS</h1>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate">CAMMS</h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Activity Management</p>
               </div>
             )}
           </div>
           
-          {/* Collapse Toggle */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 items-center justify-center rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 dark:border-gray-600 text-gray-600 dark:text-gray-300 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-md transition-all"
@@ -170,7 +149,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
           </button>
         </div>
 
-        {/* Navigation Menu */}
         <nav className="flex-1 p-3 overflow-y-auto">
           <div className="space-y-1">
             {menuItems.map((item) => {
@@ -206,7 +184,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
                     <span className="font-medium text-sm truncate">{item.label}</span>
                   )}
                   
-                  {/* Tooltip for collapsed state */}
                   {collapsed && (
                     <div className="absolute left-full ml-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
                       {item.label}
@@ -218,9 +195,7 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
           </div>
         </nav>
 
-        {/* Bottom Section */}
         <div className="border-t border-gray-200 dark:border-gray-600 dark:border-gray-700 p-3 space-y-2">
-          {/* Dark Mode Toggle - Prominent Position */}
           <div className={`flex ${collapsed ? 'justify-center' : 'justify-between items-center'} px-2 py-2`}>
             {!collapsed && (
               <span className="text-xs font-medium text-gray-600 dark:text-gray-300 dark:text-gray-400">Theme</span>
@@ -228,7 +203,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
             <DarkModeToggle />
           </div>
           
-          {/* Profile Section */}
           <Link
             to={isAdmin ? '/admin/profile' : '/instructor/profile'}
             className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -273,7 +247,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
             )}
           </Link>
           
-          {/* Logout Button */}
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-danger-500 hover:bg-danger-600 text-white font-medium transition-colors shadow-sm"

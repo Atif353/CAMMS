@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FiMail, FiLock, FiLogIn, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiLogIn, FiArrowRight, FiEye, FiEyeOff, FiActivity } from 'react-icons/fi';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -44,12 +44,8 @@ const LoginPage = () => {
         <div className="bg-white/15 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/30 p-8 animate-fadeIn">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-xl overflow-hidden">
-                <img 
-                  src="/assets/logo.png"
-                  alt="CAMMS Logo" 
-                  className="w-full h-full object-contain p-3"
-                />
+              <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 shadow-2xl border-2 border-white/30 transform hover:scale-105 transition-transform duration-300">
+                <FiActivity className="w-10 h-10 text-white" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
