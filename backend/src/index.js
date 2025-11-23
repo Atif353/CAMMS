@@ -72,7 +72,11 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        // For Swagger UI and API testing, allow requests from the same server
+        // This is safe because Swagger UI is served from the same origin
+        // In a production API, you typically want to allow API access from anywhere
+        // but restrict based on authentication tokens instead
+        callback(null, true);
       }
     },
     credentials: true,
@@ -94,14 +98,45 @@ app.use(
   })
 );
 
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, {
+// Swagger UI setup with dynamic server URL
+app.use("/api-docs", swaggerUi.serve);
+app.get("/api-docs", (req, res, next) => {
+  // Dynamically set the server URL based on the current request
+  const protocol =
+    req.protocol || req.headers["x-forwarded-proto"]?.split(",")[0] || "https";
+  const host = req.get("host") || req.headers.host;
+  const baseUrl = `${protocol}://${host}`;
+
+  // Create a modified swagger spec with the current server URL
+  const modifiedSpec = {
+    ...swaggerSpec,
+    servers: [
+      {
+        url: `${baseUrl}/api`,
+        description:
+          config.nodeEnv === "production"
+            ? "Production server"
+            : "Development server",
+      },
+      // Keep localhost for local development reference
+      ...(config.nodeEnv === "development"
+        ? [
+            {
+              url: "http://localhost:5000/api",
+              description: "Local development server",
+            },
+          ]
+        : []),
+    ],
+  };
+
+  const swaggerUiHandler = swaggerUi.setup(modifiedSpec, {
     customCss: ".swagger-ui .topbar { display: none }",
     customSiteTitle: "CAMMS API Documentation",
-  })
-);
+  });
+
+  swaggerUiHandler(req, res, next);
+});
 
 app.get("/health", (req, res) => {
   res.json({

@@ -24,8 +24,17 @@ const options = {
     servers: [
       {
         url: process.env.API_URL || 'http://localhost:5000/api',
-        description: 'Development server',
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
       },
+      // Add production server if API_URL is set
+      ...(process.env.API_URL && process.env.API_URL !== 'http://localhost:5000/api'
+        ? [
+            {
+              url: process.env.API_URL,
+              description: 'Production server',
+            },
+          ]
+        : []),
     ],
     components: {
       securitySchemes: {
