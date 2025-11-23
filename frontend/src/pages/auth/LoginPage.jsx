@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FiMail, FiLock, FiLogIn, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
-import logoImage from '/assets/logo.png';
-import backgroundImage from '/assets/background.png';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -36,7 +34,7 @@ const LoginPage = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url(${backgroundImage})`,
+          backgroundImage: `url('/assets/background.png')`,
         }}
       />
       
@@ -48,9 +46,19 @@ const LoginPage = () => {
             <div className="flex justify-center mb-4">
               <div className="w-20 h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-xl overflow-hidden">
                 <img 
-                  src={logoImage} 
+                  src="/assets/logo.png" 
                   alt="CAMMS Logo" 
                   className="w-full h-full object-contain p-3"
+                  loading="eager"
+                  onError={(e) => {
+                    console.error('Logo failed to load, trying alternative path');
+                    // Try alternative path
+                    e.target.src = './assets/logo.png';
+                    e.target.onerror = () => {
+                      console.error('Logo failed to load from alternative path');
+                      e.target.style.display = 'none';
+                    };
+                  }}
                 />
               </div>
             </div>
