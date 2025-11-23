@@ -45,7 +45,7 @@ const LoginPage = () => {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 shadow-2xl border-2 border-white/30 transform hover:scale-105 transition-transform duration-300">
-                <FiActivity className="w-10 h-10 text-white" />
+                <FiActivity size={40} color="white" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">

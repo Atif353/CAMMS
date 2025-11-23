@@ -130,7 +130,7 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
         <div className="relative p-5 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-700 flex items-center justify-center shadow-lg flex-shrink-0 transform hover:scale-105 transition-transform duration-300">
-              <FiActivity className="w-6 h-6 text-white" />
+              <FiActivity size={24} color="white" />
             </div>
             
             {!collapsed && (
