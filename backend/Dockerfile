@@ -15,7 +15,8 @@ COPY services/requirements.txt ./services/
 RUN npm ci
 
 # Install Python dependencies
-RUN python3 -m pip install --user -r services/requirements.txt
+# Use --break-system-packages since this is a container and we control the environment
+RUN python3 -m pip install --break-system-packages -r services/requirements.txt
 
 # Copy application code
 COPY . .
