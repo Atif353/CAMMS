@@ -11,9 +11,23 @@ A `Dockerfile` has been created in `backend/` that:
 
 ## Railway Configuration
 
-The `railway.json` and `railway.toml` files are configured to use the Dockerfile.
+### IMPORTANT: Set Service Root Directory
 
-**No additional configuration needed!** Just deploy to Railway and it will:
+**You MUST configure Railway to use `backend/` as the root directory:**
+
+1. Go to your Railway project dashboard
+2. Select your backend service
+3. Go to **Settings** → **Service**
+4. Set **Root Directory** to: `backend`
+5. Save the changes
+
+This tells Railway to look for the Dockerfile in the `backend/` directory.
+
+### Configuration Files
+
+The `railway.json` and `railway.toml` files are configured to use the Dockerfile builder.
+
+**After setting the root directory, Railway will:**
 1. Build using the Dockerfile
 2. Install Python and pip automatically
 3. Install all dependencies
