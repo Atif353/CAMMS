@@ -24,8 +24,16 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
+
+const uploadsDir = path.join(__dirname, "../../uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  logger.info(`📁 Created uploads directory: ${uploadsDir}`);
+}
 
 // Validate environment variables with better error handling
 try {
