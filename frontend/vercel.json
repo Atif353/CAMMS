@@ -12,7 +12,16 @@
   ],
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/assets/(.*\\.(png|jpg|jpeg|gif|svg|webp|ico))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*\\.(js|mjs|css))",
       "headers": [
         {
           "key": "Cache-Control",
@@ -20,10 +29,13 @@
         },
         {
           "key": "Content-Type",
-          "value": "image/png"
+          "value": "application/javascript"
         }
       ]
     }
   ]
 }
+
+
+
 
