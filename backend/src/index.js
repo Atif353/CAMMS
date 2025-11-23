@@ -27,7 +27,21 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 
 dotenv.config();
 
-validateEnv();
+// Validate environment variables with better error handling
+try {
+  validateEnv();
+} catch (error) {
+  logger.error("❌ Environment validation failed:");
+  logger.error(error.message);
+  logger.error(
+    "\n💡 Make sure these environment variables are set in Railway:"
+  );
+  logger.error("   - DATABASE_URL (required)");
+  logger.error("   - JWT_SECRET (required, min 32 chars)");
+  logger.error("   - JWT_REFRESH_SECRET (required, min 32 chars)");
+  logger.error("   - PORT (optional, Railway sets this automatically)");
+  process.exit(1);
+}
 
 const app = express();
 
@@ -112,13 +126,14 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const PORT = config.port;
+const HOST = process.env.HOST || "0.0.0.0"; // Railway requires binding to 0.0.0.0
 
 if (process.env.NODE_ENV !== "test") {
-  app.listen(PORT, () => {
-    logger.info(`🚀 Server running on port ${PORT}`);
+  app.listen(PORT, HOST, () => {
+    logger.info(`🚀 Server running on ${HOST}:${PORT}`);
     logger.info(`📊 Environment: ${config.nodeEnv}`);
-    logger.info(`🔗 API: http://localhost:${PORT}/api`);
-    logger.info(`📚 Swagger Docs: http://localhost:${PORT}/api-docs`);
+    logger.info(`🔗 API: http://${HOST}:${PORT}/api`);
+    logger.info(`📚 Swagger Docs: http://${HOST}:${PORT}/api-docs`);
   });
 }
 
