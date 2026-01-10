@@ -6,24 +6,55 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const checkPythonAvailable = () => {
-  return new Promise((resolve) => {
-    const pythonCmd = "python3";
-    const checkProcess = spawn(pythonCmd, ["--version"], { stdio: "pipe" });
+let cachedPythonCmd = null;
 
-    checkProcess.on("close", (code) => {
-      resolve(code === 0);
+const getPythonCommand = async () => {
+  if (cachedPythonCmd) {
+    return cachedPythonCmd;
+  }
+
+  const commands = ["python3", "python"];
+
+  for (const cmd of commands) {
+    const available = await new Promise((resolve) => {
+      let resolved = false;
+      const checkProcess = spawn(cmd, ["--version"], { stdio: "pipe" });
+
+      const cleanup = (result) => {
+        if (!resolved) {
+          resolved = true;
+          if (checkProcess && !checkProcess.killed) {
+            checkProcess.kill();
+          }
+          resolve(result);
+        }
+      };
+
+      checkProcess.on("close", (code) => {
+        cleanup(code === 0);
+      });
+
+      checkProcess.on("error", () => {
+        cleanup(false);
+      });
+
+      setTimeout(() => {
+        cleanup(false);
+      }, 2000);
     });
 
-    checkProcess.on("error", () => {
-      resolve(false);
-    });
+    if (available) {
+      cachedPythonCmd = cmd;
+      return cmd;
+    }
+  }
 
-    setTimeout(() => {
-      checkProcess.kill();
-      resolve(false);
-    }, 2000);
-  });
+  return null;
+};
+
+const checkPythonAvailable = async () => {
+  const pythonCmd = await getPythonCommand();
+  return pythonCmd !== null;
 };
 
 export const generateReportWithPython = (
@@ -42,8 +73,8 @@ export const generateReportWithPython = (
       return;
     }
 
-    const pythonAvailable = await checkPythonAvailable();
-    if (!pythonAvailable) {
+    const pythonCmd = await getPythonCommand();
+    if (!pythonCmd) {
       console.error("❌ Python 3 is not installed or not available in PATH");
       console.error(
         "💡 PDF/Excel reports require Python 3 with pandas, matplotlib, and openpyxl"
@@ -62,8 +93,6 @@ export const generateReportWithPython = (
       reportType,
       outputFormat,
     };
-
-    const pythonCmd = "python3";
 
     const pythonProcess = spawn(pythonCmd, [pythonScriptPath], {
       cwd: path.dirname(pythonScriptPath),
@@ -143,3 +172,5 @@ export const generateReportWithPython = (
     }, 30000);
   });
 };
+
+export const getPythonCommandForCheck = getPythonCommand;

@@ -8,22 +8,23 @@
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
   },
-  "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "seed": "node src/scripts/seed.js",
-    "export:mock": "node src/scripts/exportMockData.js",
-    "fix-passwords": "node src/scripts/fixPasswords.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "postinstall": "python3 -m pip install --break-system-packages -r services/requirements.txt || echo 'Python dependencies installation skipped'",
-    "setup:python": "python3 -m pip install --user -r services/requirements.txt || echo 'Python dependencies installation skipped'"
-  },
+"scripts": {
+  "start": "node src/index.js",
+  "dev": "nodemon src/index.js",
+  "seed": "node src/scripts/seed.js",
+  "export:mock": "node src/scripts/exportMockData.js",
+  "fix-passwords": "node src/scripts/fixPasswords.js",
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev",
+  "prisma:migrate:deploy": "prisma migrate deploy",
+  "prisma:studio": "prisma studio",
+  "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+  "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
+  "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+
+  "postinstall": "python -m pip install -r services/requirements.txt || echo 'Python dependencies installation skipped'",
+  "setup:python": "python -m pip install -r services/requirements.txt || echo 'Python dependencies installation skipped'"
+},
   "keywords": [
     "lms",
     "activity-tracking",

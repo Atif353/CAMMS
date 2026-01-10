@@ -76,6 +76,62 @@ const InstructorDashboardPage = () => {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
+  const formatTimeForCard = (timeFormatted, range, totalMinutes) => {
+    if (!timeFormatted || timeFormatted === '0h') return '0h';
+    if (!totalMinutes || totalMinutes === 0) return '0h';
+    
+    const totalHours = totalMinutes / 60;
+    const days = Math.floor(totalHours / 24);
+    const hours = Math.floor(totalHours % 24);
+    const minutes = totalMinutes % 60;
+    
+    if (range === 'yearly') {
+      if (days >= 1) {
+        const weeks = Math.round(days / 7 * 10) / 10;
+        if (weeks >= 4) {
+          const months = Math.round(weeks / 4.33 * 10) / 10;
+          return months >= 1 ? `${months} months` : `${weeks} weeks`;
+        }
+        return `${days} days`;
+      }
+      return timeFormatted;
+    }
+    
+    if (range === 'monthly') {
+      if (days >= 7) {
+        const weeks = Math.round(days / 7 * 10) / 10;
+        return weeks >= 4 ? `${Math.round(weeks)} weeks` : `${days} days`;
+      }
+      if (days > 0) {
+        if (hours === 0 && minutes === 0) return `${days} days`;
+        if (hours === 0) return `${days}d ${minutes}m`;
+        if (minutes === 0) return `${days}d ${hours}h`;
+        return `${days}d ${hours}h`;
+      }
+      if (hours > 0) {
+        if (minutes === 0) return `${hours}h`;
+        return `${hours}h ${minutes}m`;
+      }
+      return `${minutes}m`;
+    }
+    
+    if (range === 'weekly') {
+      if (days > 0) {
+        if (hours === 0 && minutes === 0) return `${days} days`;
+        if (hours === 0) return `${days}d`;
+        if (minutes === 0) return `${days}d ${hours}h`;
+        return `${days}d ${hours}h`;
+      }
+      if (hours > 0) {
+        if (minutes === 0) return `${hours}h`;
+        return `${hours}h ${minutes}m`;
+      }
+      return `${minutes}m`;
+    }
+    
+    return timeFormatted;
+  };
+
   // Recalculate pie chart data when dashboard or dateRange changes
   // IMPORTANT: This hook must be called before any conditional returns
   const pieChartData = useMemo(() => {
@@ -119,8 +175,8 @@ const InstructorDashboardPage = () => {
 
         {/* Date Range Filter */}
         <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-900/10 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-blue-100 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">View Data:</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-3 sm:gap-4">
+            {/* <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">View Data:</span> */}
             <div className="flex flex-wrap gap-2">
               {['daily', 'weekly', 'monthly', 'yearly'].map((range) => (
                 <button
@@ -144,7 +200,7 @@ const InstructorDashboardPage = () => {
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold mb-1">This Week</p>
+                <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold mb-1">{dateRange.charAt(0).toUpperCase() + dateRange.slice(1)} Activities</p>
                 <p className="text-4xl font-bold text-blue-700 dark:text-blue-300 mt-2">{dashboard?.weekStats?.totalActivities || 0}</p>
                 <p className="text-blue-500 dark:text-blue-400 text-xs mt-1 font-medium">activities</p>
               </div>
@@ -156,13 +212,39 @@ const InstructorDashboardPage = () => {
 
           <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold mb-1">Time Spent</p>
-                <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-300 mt-2">{dashboard?.weekStats?.totalTimeSpent || 0}</p>
-                <p className="text-emerald-500 dark:text-emerald-400 text-xs mt-1 font-medium">minutes</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold mb-2">Time Spent</p>
+                <p className={`font-bold text-emerald-700 dark:text-emerald-300 leading-tight ${
+                  dateRange === 'yearly' ? 'text-2xl sm:text-3xl mb-1' : 
+                  dateRange === 'monthly' ? 'text-2xl sm:text-3xl' : 
+                  'text-3xl sm:text-4xl'
+                }`}>
+                  {formatTimeForCard(dashboard?.weekStats?.totalTimeSpentFormatted, dateRange, dashboard?.weekStats?.totalTimeSpent)}
+                </p>
+                {dateRange === 'yearly' && dashboard?.weekStats?.totalTimeSpent > 0 && (
+                  <p className="text-xs text-emerald-500 dark:text-emerald-400 opacity-75 mt-1">
+                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 12 / 30 / 24 / 60 * 10) / 10} hrs/month avg
+                  </p>
+                )}
+                {dateRange === 'monthly' && dashboard?.weekStats?.totalTimeSpent > 0 && (
+                  <p className="text-xs text-emerald-500 dark:text-emerald-400 opacity-75 mt-1">
+                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 30 / 24 / 60 * 10) / 10} hrs/day avg
+                  </p>
+                )}
+                {dateRange === 'weekly' && dashboard?.weekStats?.totalTimeSpent > 0 && (
+                  <p className="text-xs text-emerald-500 dark:text-emerald-400 opacity-75 mt-1">
+                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 7 / 24 / 60 * 10) / 10} hrs/day avg
+                  </p>
+                )}
+                <p className="text-emerald-500 dark:text-emerald-400 text-xs mt-2 font-medium">
+                  {dateRange === 'yearly' ? 'Last 12 months' : 
+                   dateRange === 'monthly' ? 'Last 30 days' :
+                   dateRange === 'weekly' ? 'Last 7 days' :
+                   dateRange.charAt(0).toUpperCase() + dateRange.slice(1) + ' period'}
+                </p>
               </div>
-              <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
-                <FiClock className="text-3xl text-white" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-md ml-4 flex-shrink-0">
+                <FiClock className="text-2xl sm:text-3xl text-white" />
               </div>
             </div>
           </div>
@@ -207,12 +289,15 @@ const InstructorDashboardPage = () => {
               </h3>
             </div>
             <ResponsiveContainer width="100%" height={320} key={`line-chart-${dateRange}`}>
-            <LineChart data={dashboard?.trends || dashboard?.weeklyTrends || dashboard?.dailyTrends || dashboard?.monthlyTrends || dashboard?.yearlyTrends || []} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
+            <LineChart data={dashboard?.trends || []} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} opacity={0.5} />
               <XAxis 
-                dataKey={dateRange === 'daily' ? 'day' : dateRange === 'weekly' ? 'week' : dateRange === 'monthly' ? 'month' : 'year'} 
+                dataKey="date"
                 tick={{ fill: chartColors.text, fontSize: 11, fontWeight: 500 }}
                 stroke={chartColors.text}
+                angle={dateRange === 'yearly' ? 0 : -45}
+                textAnchor={dateRange === 'yearly' ? 'middle' : 'end'}
+                height={dateRange === 'yearly' ? 40 : 80}
               />
               <YAxis 
                 yAxisId="left"
@@ -223,11 +308,32 @@ const InstructorDashboardPage = () => {
               <YAxis 
                 yAxisId="right"
                 orientation="right"
-                label={{ value: 'Time (min)', angle: 90, position: 'insideRight', fill: '#10b981', fontSize: 12, fontWeight: 600 }}
+                label={{ value: 'Time (h)', angle: 90, position: 'insideRight', fill: '#10b981', fontSize: 12, fontWeight: 600 }}
                 tick={{ fill: '#10b981', fontSize: 11, fontWeight: 500 }}
                 stroke="#10b981"
               />
               <Tooltip 
+                formatter={(value, name, props) => {
+                  if (name === 'Time (h)') {
+                    const minutes = props.payload.timeSpent || 0;
+                    const totalHours = Math.floor(minutes / 60);
+                    const days = Math.floor(totalHours / 24);
+                    const hours = totalHours % 24;
+                    const mins = minutes % 60;
+                    
+                    if (days > 0) {
+                      const parts = [`${days}d`];
+                      if (hours > 0) parts.push(`${hours}h`);
+                      if (mins > 0) parts.push(`${mins}m`);
+                      return parts.join(' ');
+                    }
+                    if (hours === 0) return `${mins}m`;
+                    if (mins === 0) return `${hours}h`;
+                    return `${hours}h ${mins}m`;
+                  }
+                  return value;
+                }}
+                labelFormatter={(label) => `Date: ${label}`}
                 contentStyle={{ 
                   backgroundColor: chartColors.tooltipBg, 
                   border: `2px solid ${chartColors.tooltipBorder}`,
@@ -258,12 +364,12 @@ const InstructorDashboardPage = () => {
               <Line 
                 yAxisId="right"
                 type="monotone" 
-                dataKey="timeSpent" 
+                dataKey="timeSpentHours" 
                 stroke="#10b981" 
                 strokeWidth={3}
                 dot={{ fill: '#10b981', r: 6, strokeWidth: 2, stroke: '#fff' }}
                 activeDot={{ r: 8, strokeWidth: 2 }}
-                name="Time (min)"
+                name="Time (h)"
                 animationDuration={1000}
               />
             </LineChart>
@@ -373,7 +479,7 @@ const InstructorDashboardPage = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-300">Monthly Time</span>
-                <span className="font-bold text-blue-600 dark:text-blue-400">{dashboard?.monthStats?.totalTimeSpent || 0} min</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{dashboard?.monthStats?.totalTimeSpentFormatted || '0h'}</span>
               </div>
             </div>
           </div>

@@ -188,7 +188,18 @@ app.use("/api/upload", uploadRoutes);
 
 app.get("/python-test", async (req, res) => {
   const { spawn } = await import("child_process");
-  const python = spawn("python3", ["--version"]);
+  const { getPythonCommandForCheck } = await import("./utils/pythonService.js");
+  
+  const pythonCmd = await getPythonCommandForCheck();
+  if (!pythonCmd) {
+    return res.json({
+      success: false,
+      message: "Python is not available",
+      output: "Python command not found",
+    });
+  }
+
+  const python = spawn(pythonCmd, ["--version"]);
   let output = "";
 
   python.stdout.on("data", (data) => (output += data.toString()));
@@ -200,6 +211,7 @@ app.get("/python-test", async (req, res) => {
         success: true,
         message: "Python is available",
         version: output.trim(),
+        command: pythonCmd,
       });
     } else {
       res.json({
@@ -232,23 +244,15 @@ if (process.env.NODE_ENV !== "test") {
     logger.info(`🔗 API: http://${HOST}:${PORT}/api`);
     logger.info(`📚 Swagger Docs: http://${HOST}:${PORT}/api-docs`);
 
-    const { spawn } = await import("child_process");
-    const pythonCmd = "python3";
-    const checkPython = spawn(pythonCmd, ["--version"], { stdio: "pipe" });
-    checkPython.on("close", (code) => {
-      if (code === 0) {
-        logger.info(`🐍 Python service: Available`);
-      } else {
-        logger.warn(
-          `⚠️  Python service: Not available - PDF/Excel reports will use JSON fallback`
-        );
-      }
-    });
-    checkPython.on("error", () => {
+    const { getPythonCommandForCheck } = await import("./utils/pythonService.js");
+    const pythonCmd = await getPythonCommandForCheck();
+    if (pythonCmd) {
+      logger.info(`🐍 Python service: Available (using ${pythonCmd})`);
+    } else {
       logger.warn(
         `⚠️  Python service: Not available - PDF/Excel reports will use JSON fallback`
       );
-    });
+    }
   });
 }
 

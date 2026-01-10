@@ -41,6 +41,31 @@ export const formatDateTime = (date) => {
   return new Date(date).toISOString();
 };
 
+export const minutesToHours = (minutes) => {
+  if (!minutes || minutes === 0) return { days: 0, hours: 0, minutes: 0 };
+  const totalHours = Math.floor(minutes / 60);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  const remainingMinutes = minutes % 60;
+  return { days, hours, minutes: remainingMinutes };
+};
+
+export const formatTimeDisplay = (totalMinutes) => {
+  if (!totalMinutes || totalMinutes === 0) return '0h';
+  const { days, hours, minutes } = minutesToHours(totalMinutes);
+  
+  if (days > 0) {
+    const parts = [`${days}d`];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    return parts.join(' ');
+  }
+  
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+};
+
 export const getDateRange = (range = 'weekly') => {
   const today = new Date();
   today.setHours(23, 59, 59, 999);
@@ -52,18 +77,29 @@ export const getDateRange = (range = 'weekly') => {
       return { startDate: startOfDay, endDate: today };
     
     case 'weekly':
-      return getWeekRange(today);
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - 6);
+      weekStart.setHours(0, 0, 0, 0);
+      return { startDate: weekStart, endDate: today };
     
     case 'monthly':
-      return getMonthRange(today);
+      const monthStart = new Date(today);
+      monthStart.setDate(monthStart.getDate() - 29);
+      monthStart.setHours(0, 0, 0, 0);
+      return { startDate: monthStart, endDate: today };
     
     case 'yearly':
-      const startOfYear = new Date(today.getFullYear(), 0, 1);
-      startOfYear.setHours(0, 0, 0, 0);
-      return { startDate: startOfYear, endDate: today };
+      const yearStart = new Date(today);
+      yearStart.setMonth(yearStart.getMonth() - 11);
+      yearStart.setDate(1);
+      yearStart.setHours(0, 0, 0, 0);
+      return { startDate: yearStart, endDate: today };
     
     default:
-      return getWeekRange(today);
+      const defaultStart = new Date(today);
+      defaultStart.setDate(defaultStart.getDate() - 6);
+      defaultStart.setHours(0, 0, 0, 0);
+      return { startDate: defaultStart, endDate: today };
   }
 };
 
