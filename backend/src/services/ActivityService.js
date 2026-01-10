@@ -14,13 +14,11 @@ export const ActivityService = {
       status,
     } = activityData;
 
-    // Get activity type
     const activityTypeRecord = await ActivityTypeModel.findByCode(activityType);
     if (!activityTypeRecord) {
       throw new Error('Invalid activity type');
     }
 
-    // Create activity
     const activity = await ActivityModel.create({
       instructorId,
       activityTypeId: activityTypeRecord.id,

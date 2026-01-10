@@ -29,11 +29,9 @@ const SettingsPage = () => {
   };
 
   const handleSave = async () => {
-    // Validate REMINDER_DAYS_BEFORE_DEADLINE before saving
     const reminderDays = parseInt(settings.REMINDER_DAYS_BEFORE_DEADLINE, 10);
     if (isNaN(reminderDays) || reminderDays < 1 || reminderDays > 30) {
       toast.error('Reminder days must be a number between 1 and 30');
-      // Reset to default if invalid
       setSettings({ ...settings, REMINDER_DAYS_BEFORE_DEADLINE: '2' });
       return;
     }
@@ -151,7 +149,6 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          {/* Notification Alert Days Setting */}
           <div className="rounded-lg p-6 border-2 bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
@@ -176,17 +173,14 @@ const SettingsPage = () => {
                   value={settings.REMINDER_DAYS_BEFORE_DEADLINE || '2'}
                   onChange={(e) => {
                     const value = e.target.value;
-                    // Only allow numbers between 1 and 30
                     const numValue = parseInt(value, 10);
                     if (value === '') {
-                      // Allow empty temporarily while typing
                       setSettings({ ...settings, REMINDER_DAYS_BEFORE_DEADLINE: '' });
                     } else if (!isNaN(numValue) && numValue >= 1 && numValue <= 30) {
                       setSettings({ ...settings, REMINDER_DAYS_BEFORE_DEADLINE: value });
                     }
                   }}
                   onBlur={(e) => {
-                    // Ensure a valid value on blur
                     const value = e.target.value;
                     const numValue = parseInt(value, 10);
                     if (value === '' || isNaN(numValue) || numValue < 1) {

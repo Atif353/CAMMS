@@ -95,7 +95,6 @@ export const UserService = {
     const user = await UserModel.update(id, updatePayload);
     const roleRecord = await RoleModel.findById(user.role_id);
 
-    // Fetch updated user with profile_image
     const updatedUser = await UserModel.findById(user.id);
     return {
       id: updatedUser.id,

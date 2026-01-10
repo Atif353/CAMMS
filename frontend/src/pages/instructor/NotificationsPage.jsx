@@ -59,7 +59,6 @@ const NotificationsPage = () => {
   const getButtonPosition = (index) => {
     const button = buttonRefs.current[`button-${index}`];
     if (!button) {
-      // Default logic: first item shows below, last item shows above
       if (index === 0) return 'bottom';
       if (index === notifications.length - 1) return 'above';
       return 'bottom';
@@ -69,13 +68,11 @@ const NotificationsPage = () => {
     const viewportHeight = window.innerHeight;
     const spaceBelow = viewportHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const buttonHeight = 50; // Approximate height of button
+    const buttonHeight = 50;
     
-    // If there's not enough space below but enough space above, show above
     if (spaceBelow < buttonHeight + 10 && spaceAbove > buttonHeight + 10) {
       return 'above';
     }
-    // Otherwise show below
     return 'bottom';
   };
 
@@ -92,7 +89,6 @@ const NotificationsPage = () => {
   return (
     <Layout>
       <div className="space-y-6 animate-fadeIn">
-        {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -118,21 +114,17 @@ const NotificationsPage = () => {
           </div>
         </div>
 
-        {/* Notifications List */}
         <div className="space-y-4">
           {notifications.map((notification, index) => {
             const isLastItem = index === notifications.length - 1;
             const isFirstItem = index === 0;
             
-            // For first item, always show below; for last item, always show above
-            // For others, calculate position dynamically
             let position = 'bottom';
             if (isFirstItem) {
               position = 'bottom';
             } else if (isLastItem) {
               position = 'above';
             } else {
-              // For middle items, calculate based on viewport
               position = getButtonPosition(index);
             }
             

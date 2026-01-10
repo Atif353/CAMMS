@@ -1,27 +1,8 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { FiCheckCircle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi';
 
-/**
- * TOAST NOTIFICATION SYSTEM
- * 
- * Purpose: Show temporary success/error/info messages to users
- * 
- * Easy to explain in viva:
- * - "I created a global toast notification system using React Context"
- * - "Toasts appear at top-right, auto-dismiss after 3 seconds"
- * - "Different colors for success (green), error (red), info (blue)"
- * - "Users can manually dismiss by clicking X"
- * 
- * Technical concepts:
- * - React Context API for global state
- * - Custom hooks for easy usage
- * - CSS animations for smooth entry/exit
- * - Auto-dismiss with setTimeout
- */
-
 const ToastContext = createContext();
 
-// Custom hook to use toast from any component
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
@@ -30,29 +11,24 @@ export const useToast = () => {
   return context;
 };
 
-// Toast Provider Component
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  // Add a new toast
   const addToast = useCallback((message, type = 'info') => {
     const id = Date.now();
     const newToast = { id, message, type };
     
     setToasts((prev) => [...prev, newToast]);
 
-    // Auto-dismiss after 3 seconds
     setTimeout(() => {
       removeToast(id);
     }, 3000);
   }, []);
 
-  // Remove a toast
   const removeToast = useCallback((id) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  // Convenience methods
   const success = useCallback((message) => addToast(message, 'success'), [addToast]);
   const error = useCallback((message) => addToast(message, 'error'), [addToast]);
   const info = useCallback((message) => addToast(message, 'info'), [addToast]);
@@ -61,7 +37,6 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ addToast, success, error, info }}>
       {children}
       
-      {/* Toast Container - Fixed position at top-right */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {toasts.map((toast) => (
           <Toast key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
@@ -71,9 +46,7 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-// Individual Toast Component
 const Toast = ({ toast, onClose }) => {
-  // Different styles for different types
   const styles = {
     success: {
       bg: 'bg-success-50 dark:bg-success-900',

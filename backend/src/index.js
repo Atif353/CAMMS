@@ -34,7 +34,6 @@ if (!fs.existsSync(uploadsDir)) {
   logger.info(`📁 Created uploads directory: ${uploadsDir}`);
 }
 
-// Validate environment variables with better error handling
 try {
   validateEnv();
 } catch (error) {
@@ -52,8 +51,6 @@ try {
 
 const app = express();
 
-// Trust proxy - required for Railway to get correct protocol and host
-// This allows Express to read x-forwarded-proto and x-forwarded-host headers
 app.set("trust proxy", 1);
 
 app.use(
@@ -108,18 +105,13 @@ app.use(
   })
 );
 
-// Swagger UI setup with dynamic server URL
 app.use("/api-docs", swaggerUi.serve);
 app.get("/api-docs", (req, res, next) => {
-  // Dynamically set the server URL based on the current request
-  // Railway sets x-forwarded-proto header, and with trust proxy, req.protocol will be correct
   let protocol = req.protocol;
 
-  // In production (Railway), always use HTTPS
   if (config.nodeEnv === "production") {
     protocol = "https";
   } else {
-    // In development, use the detected protocol or default to http
     const forwardedProto = req.headers["x-forwarded-proto"];
     if (forwardedProto) {
       protocol = forwardedProto.split(",")[0].trim();
@@ -131,12 +123,10 @@ app.get("/api-docs", (req, res, next) => {
   const host = req.get("host") || req.headers.host;
   const baseUrl = `${protocol}://${host}`;
 
-  // Log for debugging (remove in production if needed)
   if (config.nodeEnv === "development") {
     logger.info(`Swagger UI: Using base URL: ${baseUrl}/api`);
   }
 
-  // Create a modified swagger spec with the current server URL
   const modifiedSpec = {
     ...swaggerSpec,
     servers: [
@@ -147,7 +137,6 @@ app.get("/api-docs", (req, res, next) => {
             ? "Production server"
             : "Development server",
       },
-      // Keep localhost for local development reference
       ...(config.nodeEnv === "development"
         ? [
             {
@@ -235,7 +224,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const PORT = config.port;
-const HOST = process.env.HOST || "0.0.0.0"; // Railway requires binding to 0.0.0.0
+const HOST = process.env.HOST || "0.0.0.0";
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, HOST, async () => {

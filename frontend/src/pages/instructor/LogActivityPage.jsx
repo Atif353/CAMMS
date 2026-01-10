@@ -250,7 +250,6 @@ const LogActivityPage = () => {
               </div>
             </div>
 
-            {/* Dynamic Meta Fields */}
             {renderMetaFields().length > 0 && (
               <div className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 rounded-xl p-6 border border-blue-100 dark:border-blue-800/30">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Additional Details</h3>

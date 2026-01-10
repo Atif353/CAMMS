@@ -22,7 +22,6 @@ export const SettingService = {
   },
 
   async updateSetting(key, value) {
-    // Validate REMINDER_DAYS_BEFORE_DEADLINE setting
     if (key === 'REMINDER_DAYS_BEFORE_DEADLINE') {
       const days = parseInt(value, 10);
       if (isNaN(days) || days < 1 || days > 30) {

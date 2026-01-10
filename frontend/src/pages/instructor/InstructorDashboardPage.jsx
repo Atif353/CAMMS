@@ -132,8 +132,6 @@ const InstructorDashboardPage = () => {
     return timeFormatted;
   };
 
-  // Recalculate pie chart data when dashboard or dateRange changes
-  // IMPORTANT: This hook must be called before any conditional returns
   const pieChartData = useMemo(() => {
     if (!dashboard?.activityTypeCount) return [];
     return Object.entries(dashboard.activityTypeCount).map(([type, count]) => {
@@ -173,10 +171,8 @@ const InstructorDashboardPage = () => {
           </div>
         </div>
 
-        {/* Date Range Filter */}
         <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-900/10 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-blue-100 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-3 sm:gap-4">
-            {/* <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">View Data:</span> */}
             <div className="flex flex-wrap gap-2">
               {['daily', 'weekly', 'monthly', 'yearly'].map((range) => (
                 <button
@@ -195,7 +191,6 @@ const InstructorDashboardPage = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
@@ -276,9 +271,7 @@ const InstructorDashboardPage = () => {
           </div>
         </div>
 
-        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Activity Type Chart */}
           <div className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-700/30 rounded-2xl shadow-xl p-6 border-2 border-blue-100 dark:border-gray-700 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -376,7 +369,6 @@ const InstructorDashboardPage = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Activity Type Distribution */}
         <div className="bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/10 rounded-2xl shadow-xl p-4 sm:p-6 border-2 border-purple-100 dark:border-gray-700 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -436,7 +428,6 @@ const InstructorDashboardPage = () => {
           </div>
         </div>
 
-        {/* Performance Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-gradient-to-br from-purple-50 to-white dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-xl p-6 border border-purple-100 dark:border-gray-700">
             <div className="flex items-center space-x-3 mb-4">

@@ -9,14 +9,12 @@ export const DashboardService = {
     const weekRange = getWeekRange();
     const monthRange = getMonthRange();
 
-    // Get activities for selected date range
     const rangeActivities = await ActivityModel.findByDateRange(
       formatDate(selectedRange.startDate),
       formatDate(selectedRange.endDate),
       instructorId
     );
 
-    // Get activities for this week (for comparison)
     const weekActivities = await ActivityModel.findByDateRange(
       formatDate(weekRange.startDate),
       formatDate(weekRange.endDate),
@@ -55,7 +53,6 @@ export const DashboardService = {
       totalTimeSpentFormatted: formatTimeDisplay(monthTimeMinutes),
     };
 
-    // Group by activity type for chart
     const activityTypeCount = {};
     rangeActivities.forEach((activity) => {
       const type = activity.activity_type_code;
@@ -103,7 +100,6 @@ export const DashboardService = {
       });
     }
 
-    // Get unread notifications count
     const unreadCount = await NotificationModel.getUnreadCount(instructorId);
 
     const trends = [];

@@ -4,7 +4,6 @@ import { NotificationService } from '../services/NotificationService.js';
 export const DashboardController = {
   async getInstructorDashboard(req, res, next) {
     try {
-      // Check and create notifications
       await NotificationService.checkAndCreateNotifications(req.user.id);
 
       const dateRange = req.query.dateRange || 'weekly';

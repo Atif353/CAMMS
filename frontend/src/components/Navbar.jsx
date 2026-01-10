@@ -2,17 +2,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
-/**
- * NAVBAR COMPONENT
- * 
- * Enhanced with dark mode support for viva demonstration
- * 
- * Key features to explain:
- * 1. Responsive design (mobile-friendly)
- * 2. Dark mode toggle integration
- * 3. Role-based navigation (Admin vs Instructor)
- * 4. Smooth hover effects
- */
 const Navbar = () => {
   const { user, logout, isAdmin, isInstructor } = useAuth();
   const navigate = useNavigate();
@@ -96,7 +85,6 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            {/* Dark Mode Toggle - Easy to demo in viva */}
             <DarkModeToggle />
             
             <span className="text-sm text-gray-700 dark:text-gray-200 dark:text-gray-300">{user?.name}</span>

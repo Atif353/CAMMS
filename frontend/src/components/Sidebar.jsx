@@ -234,7 +234,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
               />
               <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success-400 rounded-full border-2 border-white dark:border-gray-900"></div>
             </div>
-            {/* Collapased */}
             {!collapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white truncate">

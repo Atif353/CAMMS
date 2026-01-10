@@ -6,7 +6,6 @@ import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 
 export const AuthService = {
   async signup(userData) {
-    // Check maintenance mode
     const maintenanceSetting = await SettingModel.findByKey('MAINTENANCE_MODE');
     const isMaintenanceMode = maintenanceSetting && maintenanceSetting.value === 'true';
     
@@ -62,8 +61,6 @@ export const AuthService = {
       throw error;
     }
 
-    // Maintenance mode check: Block all non-ADMIN users during maintenance
-    // ADMIN users can still login during maintenance mode
     if (isMaintenanceMode && user.role_name !== 'ADMIN') {
       const error = new Error('System is currently under maintenance. Only administrators can access the system at this time. Please try again later.');
       error.statusCode = 503;
@@ -78,7 +75,6 @@ export const AuthService = {
       throw error;
     }
 
-    // Generate tokens
     const payload = {
       sub: user.id,
       role: user.role_name,

@@ -170,7 +170,6 @@ export const UserModel = {
   },
 
   async delete(id) {
-    // Actually delete the user from database
     return await prisma.user.delete({
       where: { id },
       select: {

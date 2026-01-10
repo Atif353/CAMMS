@@ -1,7 +1,6 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcryptjs';
 
-// Pakistani names for instructors
 const pakistaniInstructors = [
   { firstName: 'Ahmed', lastName: 'Khan', email: 'ahmed.khan@vu.edu.pk' },
   { firstName: 'Fatima', lastName: 'Ali', email: 'fatima.ali@vu.edu.pk' },
@@ -20,34 +19,23 @@ const pakistaniInstructors = [
   { firstName: 'Kamran', lastName: 'Yousuf', email: 'kamran.yousuf@vu.edu.pk' },
 ];
 
-// Pakistani admin name
 const pakistaniAdmin = {
   firstName: 'Atif',
   lastName: 'Mubashar',
   email: 'atif.mubashar@vu.edu.pk',
 };
 
-// Course codes from the study scheme
 const courseCodes = [
-  // Semester 1
   'CS101', 'ENG101', 'MTH101', 'MTH202', 'BIO101', 'PHY101', 'PHY301', 'MTH100', 'PAK301', 'VU001',
-  // Semester 2
   'CS201', 'CS302', 'ENG201', 'STA301', 'MTH104', 'PAK302', 'ETH202', 'ISL202', 'CS201P',
-  // Semester 3
   'CS301', 'CS304', 'CS601', 'MCM301', 'MTH401', 'CS301P', 'CS304P',
-  // Semester 4
   'CS401', 'CS403', 'CS504', 'MGT602', 'MTH501', 'CS525', 'CS403P',
-  // Semester 5
   'CS306', 'CS402', 'CS502', 'CS604', 'CSI619', 'MTH603', 'CS202', 'CS605', 'CS610',
-  // Semester 6
   'CS411', 'CS501', 'CS602', 'CS607', 'CS314', 'CS405', 'CS603',
-  // Semester 7
   'CS619', 'CS515', 'CS609', 'CS621', 'ECO401', 'MGT502', 'MGT610',
-  // Semester 8
   'CS205', 'CS606', 'CS311', 'CS407', 'CS408', 'CS435', 'CS506', 'CS611', 'CS614',
 ];
 
-// Activity type descriptions for realistic data
 const activityDescriptions = {
   MDB_REPLY: [
     'Replied to student queries on MDB regarding course concepts',
@@ -105,18 +93,15 @@ async function seedDatabase() {
     console.log('🌱 Starting database seeding...');
     console.log('🗑️  Clearing existing data...');
 
-    // Delete all data in reverse order of dependencies
     await prisma.activity.deleteMany({});
     await prisma.notification.deleteMany({});
     await prisma.report.deleteMany({});
     await prisma.user.deleteMany({});
     await prisma.activityType.deleteMany({});
     await prisma.setting.deleteMany({});
-    // Note: Roles are kept as they are required for the system
 
     console.log('✅ All existing data cleared');
 
-    // Create roles if they don't exist
     await prisma.role.upsert({
       where: { name: 'ADMIN' },
       update: {},
@@ -136,7 +121,6 @@ async function seedDatabase() {
     });
     console.log('✅ Roles inserted');
 
-    // Create activity types
     const activityTypes = [
       { code: 'MDB_REPLY', label: 'MDB Reply', description: 'Moderated Discussion Board replies' },
       { code: 'TICKET_RESPONSE', label: 'Ticket Response', description: 'Support ticket responses' },
@@ -156,19 +140,15 @@ async function seedDatabase() {
     }
     console.log('✅ Activity types inserted');
 
-    // Get roles
     const adminRole = await prisma.role.findUnique({ where: { name: 'ADMIN' } });
     const instructorRole = await prisma.role.findUnique({ where: { name: 'INSTRUCTOR' } });
 
-    // Plain text passwords (for export reference - passwords are hashed in database)
     const adminPlainPassword = 'Admin@2024#Secure';
     const instructorPlainPassword = 'Instructor@2024#Secure';
     
-    // Hash strong passwords (best practices: min 12 chars, mixed case, numbers, special chars)
     const adminPassword = await bcrypt.hash(adminPlainPassword, 10);
     const instructorPassword = await bcrypt.hash(instructorPlainPassword, 10);
 
-    // Create admin user (let Prisma generate UUID automatically)
     const admin = await prisma.user.create({
       data: {
         name: `${pakistaniAdmin.firstName} ${pakistaniAdmin.lastName}`,
@@ -178,17 +158,14 @@ async function seedDatabase() {
         phone: '+92-300-1234567',
       },
     });
-    // Store plain password for export reference
     admin.plainPassword = adminPlainPassword;
     console.log(`✅ Admin user created: ${admin.email} / ${adminPlainPassword} (ID: ${admin.id})`);
 
-    // Create 15 instructor users
     const instructorIds = [];
     const instructorsWithPasswords = [];
     for (const instructor of pakistaniInstructors) {
-      // Generate realistic Pakistani phone number
-      const phonePrefix = 300 + Math.floor(Math.random() * 700); // 300-999
-      const phoneSuffix = Math.floor(1000000 + Math.random() * 9000000); // 7 digits
+      const phonePrefix = 300 + Math.floor(Math.random() * 700);
+      const phoneSuffix = Math.floor(1000000 + Math.random() * 9000000);
       const phoneNumber = `+92-${phonePrefix}-${phoneSuffix}`;
       
       const user = await prisma.user.create({
@@ -200,7 +177,6 @@ async function seedDatabase() {
           phone: phoneNumber,
         },
       });
-      // Store plain password for export reference
       user.plainPassword = instructorPlainPassword;
       instructorIds.push(user.id);
       instructorsWithPasswords.push(user);
@@ -208,89 +184,75 @@ async function seedDatabase() {
     }
     console.log(`✅ All ${instructorIds.length} instructors created`);
 
-    // Get activity type mappings
     const activityTypeMap = {};
     const activityTypesData = await prisma.activityType.findMany();
     activityTypesData.forEach((at) => {
       activityTypeMap[at.code] = at.id;
     });
 
-    // Generate 1000+ activities distributed across all instructors
     const activities = [];
     const today = new Date();
-    const targetActivityCount = 1200; // More than 1000 activities
+    const targetActivityCount = 1200;
     let activityCount = 0;
 
-    // Generate activities for the past 6 months
     for (let monthOffset = 0; monthOffset < 6; monthOffset++) {
       const monthDate = new Date(today);
       monthDate.setMonth(today.getMonth() - monthOffset);
       
-      // Get days in the month
       const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
       
       for (let day = 1; day <= daysInMonth && activityCount < targetActivityCount; day++) {
         const activityDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
         
-        // Skip weekends occasionally (instructors work less on weekends)
         if (activityDate.getDay() === 0 || activityDate.getDay() === 6) {
-          if (Math.random() > 0.3) continue; // 70% chance to skip weekends
+          if (Math.random() > 0.3) continue;
         }
 
-        // Generate 3-8 activities per day, distributed across instructors
         const numActivities = Math.floor(Math.random() * 6) + 3;
         
         for (let i = 0; i < numActivities && activityCount < targetActivityCount; i++) {
-          // Randomly select an instructor
           const instructorId = instructorIds[Math.floor(Math.random() * instructorIds.length)];
           
-          // Randomly select an activity type
           const activityTypeCodes = Object.keys(activityTypeMap);
           const randomType = activityTypeCodes[Math.floor(Math.random() * activityTypeCodes.length)];
           
-          // Get random course code
           const courseCode = courseCodes[Math.floor(Math.random() * courseCodes.length)];
           
-          // Get random description for this activity type
           const descriptions = activityDescriptions[randomType];
           const description = descriptions[Math.floor(Math.random() * descriptions.length)];
           
-          // Generate realistic time spent (varies by activity type)
           let timeSpentMinutes;
           switch (randomType) {
             case 'MDB_REPLY':
-              timeSpentMinutes = Math.floor(Math.random() * 60) + 20; // 20-80 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 60) + 20;
               break;
             case 'TICKET_RESPONSE':
-              timeSpentMinutes = Math.floor(Math.random() * 45) + 15; // 15-60 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 45) + 15;
               break;
             case 'ASSIGNMENT_UPLOAD':
-              timeSpentMinutes = Math.floor(Math.random() * 30) + 10; // 10-40 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 30) + 10;
               break;
             case 'ASSIGNMENT_MARKING':
-              timeSpentMinutes = Math.floor(Math.random() * 180) + 60; // 60-240 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 180) + 60;
               break;
             case 'GDB_MARKING':
-              timeSpentMinutes = Math.floor(Math.random() * 120) + 45; // 45-165 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 120) + 45;
               break;
             case 'WEEKLY_SESSION':
-              timeSpentMinutes = Math.floor(Math.random() * 60) + 90; // 90-150 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 60) + 90;
               break;
             case 'EMAIL_RESPONSE':
-              timeSpentMinutes = Math.floor(Math.random() * 20) + 5; // 5-25 minutes
+              timeSpentMinutes = Math.floor(Math.random() * 20) + 5;
               break;
             default:
               timeSpentMinutes = Math.floor(Math.random() * 60) + 15;
           }
 
-          // Generate random time within the day
-          const hour = Math.floor(Math.random() * 12) + 8; // 8 AM to 8 PM
+          const hour = Math.floor(Math.random() * 12) + 8;
           const minute = Math.floor(Math.random() * 60);
           const activityDateTime = new Date(activityDate);
           activityDateTime.setHours(hour, minute, 0, 0);
 
-          // Create a Date object at midnight UTC for the activity date
-          // Prisma will convert this to the database Date type
           const dateForDb = new Date(activityDate);
           dateForDb.setUTCHours(0, 0, 0, 0);
 
@@ -309,7 +271,7 @@ async function seedDatabase() {
               num_tickets_resolved: randomType === 'TICKET_RESPONSE' ? Math.floor(Math.random() * 10) + 1 : undefined,
               session_duration: randomType === 'WEEKLY_SESSION' ? timeSpentMinutes : undefined,
             },
-            status: Math.random() > 0.4 ? 'COMPLETED' : 'PENDING', // 60% completed, 40% pending
+            status: Math.random() > 0.4 ? 'COMPLETED' : 'PENDING',
           });
           
           activityCount++;
@@ -327,14 +289,10 @@ async function seedDatabase() {
     }
     console.log(`✅ ${activities.length} activities inserted for all instructors`);
 
-    // Create sample notifications for pending activities within reminder window
-    // Get the reminder days setting (default 2)
     const reminderDays = 2;
-    // Reuse the 'today' variable from above, but reset it to midnight UTC for notification calculations
     const todayForNotifications = new Date();
     todayForNotifications.setUTCHours(0, 0, 0, 0);
     
-    // Get all pending activities that are within the reminder window
     const pendingActivities = await prisma.activity.findMany({
       where: {
         status: 'PENDING',
@@ -350,15 +308,13 @@ async function seedDatabase() {
       activityDate.setUTCHours(0, 0, 0, 0);
       const daysDiff = Math.ceil((activityDate - todayForNotifications) / (1000 * 60 * 60 * 24));
       
-      // Create notification if activity is within reminder window (0 to reminderDays days)
       if (daysDiff >= 0 && daysDiff <= reminderDays) {
-        // Randomly create notifications for some pending activities (not all, to make it realistic)
-        if (Math.random() > 0.3) { // 70% chance to create notification
+        if (Math.random() > 0.3) {
           const priority = daysDiff <= 1 ? 'HIGH' : 'MEDIUM';
           const notificationDate = new Date(activity.activityDate);
-          notificationDate.setDate(notificationDate.getDate() - daysDiff); // Notification created daysDiff days before deadline
+          notificationDate.setDate(notificationDate.getDate() - daysDiff);
           
-          const isRead = Math.random() > 0.6; // 40% are read, 60% unread
+          const isRead = Math.random() > 0.6;
           notifications.push({
             userId: activity.instructorId,
             title: 'Pending Activity Reminder',
@@ -376,7 +332,6 @@ async function seedDatabase() {
       }
     }
 
-    // Insert notifications
     if (notifications.length > 0) {
       for (const notification of notifications) {
         await prisma.notification.create({
@@ -388,7 +343,6 @@ async function seedDatabase() {
       console.log('ℹ️  No notifications created (no pending activities within reminder window)');
     }
 
-    // Create system settings (only the two settings actually used in the system)
     await prisma.setting.upsert({
       where: { key: 'MAINTENANCE_MODE' },
       update: {},

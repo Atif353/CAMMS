@@ -113,10 +113,6 @@ export const ReportService = {
     };
   },
 
-  /**
-   * Create a report DB record, optionally storing summarySnapshot in filters.
-   * Uses transaction to prevent race conditions.
-   */
   async createReportRecord(userId, params, summary) {
     const { reportType, instructorId, filters } = params;
 
@@ -314,10 +310,6 @@ export const ReportService = {
     }));
   },
 
-  /**
-   * Get a single report's summary + basic metadata.
-   * Prefer using stored summarySnapshot in filters; fallback to recompute.
-   */
   async getReportById(id) {
     const report = await ReportModel.findById(id);
     if (!report) {
@@ -332,7 +324,6 @@ export const ReportService = {
         const parsed = JSON.parse(report.filters);
         summarySnapshot = parsed.summarySnapshot || null;
       } catch (e) {
-        // ignore JSON error, fallback to recompute
       }
     }
 
@@ -340,7 +331,6 @@ export const ReportService = {
     if (summarySnapshot) {
       summary = summarySnapshot;
     } else {
-      // Fallback: recompute from activities
       summary = await this.buildReportSummary({
         reportType: report.report_type,
         instructorId: report.instructor_id,

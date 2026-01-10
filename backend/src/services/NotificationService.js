@@ -50,11 +50,9 @@ export const NotificationService = {
   },
 
   async checkAndCreateNotifications(userId) {
-    // Get reminder days setting
     const reminderSetting = await SettingModel.findByKey('REMINDER_DAYS_BEFORE_DEADLINE');
     const reminderDays = reminderSetting ? parseInt(reminderSetting.value) : 2;
 
-    // Get pending activities
     const pendingActivities = await ActivityModel.findByInstructor(userId, {
       status: 'PENDING',
     });
@@ -67,7 +65,6 @@ export const NotificationService = {
       const daysDiff = Math.ceil((activityDate - today) / (1000 * 60 * 60 * 24));
 
       if (daysDiff <= reminderDays && daysDiff >= 0) {
-        // Check if notification already exists
         const existingNotifications = await NotificationModel.findByUserId(userId, {
           isRead: false,
         });

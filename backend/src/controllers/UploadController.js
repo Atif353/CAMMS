@@ -69,18 +69,15 @@ export const uploadProfileImage = async (req, res, next) => {
 
       const fileExists = fs.existsSync(req.file.path);
 
-
       if (!fileExists) {
         throw new Error('File was not saved by multer');
       }
 
       if (req.file.filename !== finalFilename) {
         fs.renameSync(req.file.path, finalPath);
-
       }
 
       const finalExists = fs.existsSync(finalPath);
-
 
       if (!finalExists) {
         throw new Error('File not found at final path');
@@ -92,7 +89,6 @@ export const uploadProfileImage = async (req, res, next) => {
         if (fs.existsSync(oldImagePath)) {
           try {
             fs.unlinkSync(oldImagePath);
-
           } catch (deleteError) {
             console.error('⚠️ Error deleting old image:', deleteError);
           }
@@ -101,7 +97,6 @@ export const uploadProfileImage = async (req, res, next) => {
 
       const imagePath = `/assets/${finalFilename}`;
       await UserModel.updateProfileImage(req.user.id, imagePath);
-
 
       res.status(200).json({
         success: true,

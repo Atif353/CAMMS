@@ -1,23 +1,6 @@
 import { FiMoon, FiSun } from 'react-icons/fi';
 import { useDarkMode } from '../hooks/useDarkMode';
 
-/**
- * DARK MODE TOGGLE COMPONENT
- * 
- * Purpose: Provides a button to switch between light and dark themes
- * 
- * Features for viva demonstration:
- * 1. Smooth icon transition (moon ↔ sun)
- * 2. Animated background color change
- * 3. Tooltip showing current mode
- * 4. Accessible with keyboard (can be toggled with Enter/Space)
- * 
- * Technical explanation:
- * - Uses custom useDarkMode hook for state management
- * - Icons from react-icons library
- * - Tailwind classes for styling and animations
- * - Responsive design (works on mobile and desktop)
- */
 const DarkModeToggle = () => {
   const { isDark, toggleDarkMode } = useDarkMode();
 
@@ -40,9 +23,7 @@ const DarkModeToggle = () => {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      {/* Icon container with rotation animation */}
       <div className="relative w-5 h-5">
-        {/* Sun icon (visible in dark mode) */}
         <FiSun
           className={`
             absolute inset-0
@@ -52,7 +33,6 @@ const DarkModeToggle = () => {
           `}
         />
         
-        {/* Moon icon (visible in light mode) */}
         <FiMoon
           className={`
             absolute inset-0
@@ -63,7 +43,6 @@ const DarkModeToggle = () => {
         />
       </div>
 
-      {/* Tooltip - shows on hover */}
       <span className="
         absolute
         -bottom-10

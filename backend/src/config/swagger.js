@@ -26,7 +26,6 @@ const options = {
         url: process.env.API_URL || 'http://localhost:5000/api',
         description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
       },
-      // Add production server if API_URL is set
       ...(process.env.API_URL && process.env.API_URL !== 'http://localhost:5000/api'
         ? [
             {

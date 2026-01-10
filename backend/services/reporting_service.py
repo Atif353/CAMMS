@@ -1,38 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Python Reporting Service for CAMMS
-
-Generates professional-looking PDF and Excel reports
-
-using pandas, matplotlib, and openpyxl styling.
-
-Input (via stdin JSON):
-
-{
-
-  "reportData": { ... },   # summary object from Node
-
-  "reportType": "WEEKLY" | "MONTHLY" | "FIVE_MONTH",
-
-  "outputFormat": "pdf" | "excel"
-
-}
-
-Output (stdout JSON):
-
-{
-
-  "success": true,
-
-  "fileData": "<base64>",
-
-  "format": "pdf" | "excel"
-
-}
-
-"""
-
 import sys
 
 import json
@@ -51,7 +18,7 @@ import pandas as pd
 
 import matplotlib
 
-matplotlib.use("Agg")  # Non-interactive backend
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
@@ -60,8 +27,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 from openpyxl.utils import get_column_letter
-
-# --------- THEME CONFIG --------- #
 
 THEME_COLORS = {
 
@@ -78,7 +43,6 @@ THEME_COLORS = {
     "danger": "#e74c3c",
 
     "light_bg": "#f7f9fb",
-
 }
 
 plt.rcParams.update({
@@ -92,19 +56,9 @@ plt.rcParams.update({
     "xtick.labelsize": 8,
 
     "ytick.labelsize": 8,
-
 })
 
-# --------- HELPER FUNCTIONS --------- #
-
 def build_overall_summary(report_data: dict) -> dict:
-
-    """
-
-    Compute overall KPIs from instructorSummary.
-
-    """
-
     instructors = report_data.get("instructorSummary", [])
 
     total_instructors = len(instructors)
@@ -166,10 +120,7 @@ def build_overall_summary(report_data: dict) -> dict:
         "completionRate": completion_rate,
 
         "activityTypeAggregate": activity_type_aggregate,
-
     }
-
-# --------- PDF GENERATION --------- #
 
 def add_title_page(pdf: PdfPages, report_data: dict, report_type: str):
 
@@ -232,10 +183,7 @@ def add_title_page(pdf: PdfPages, report_data: dict, report_type: str):
         ha="center", va="center",
 
         fontsize=10, color="#bdc3c7"
-
     )
-
-    # Footer
 
     fig.text(
 
@@ -262,8 +210,6 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
     fig, axes = plt.subplots(1, 2, figsize=(11.7, 8.3))
 
     fig.suptitle("Executive Summary", fontsize=16, fontweight="bold", color=THEME_COLORS["primary"])
-
-    # Left: KPI box
 
     ax = axes[0]
 
@@ -293,8 +239,6 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
 
         y -= 0.08
 
-    # Right: Activity type distribution (bar or pie)
-
     ax2 = axes[1]
 
     agg = overall["activityTypeAggregate"]
@@ -305,7 +249,6 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
 
         counts = [agg[a]["count"] for a in labels]
 
-        # Abbreviate long labels for better readability
         abbreviated_labels = [label[:15] + "..." if len(label) > 15 else label for label in labels]
 
         bars = ax2.bar(abbreviated_labels, counts, color=THEME_COLORS["accent"])
@@ -318,20 +261,17 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
 
         ax2.tick_params(axis="x", rotation=45, labelsize=8)
 
-        # Add value labels on bars with better positioning
         max_count = max(counts) if counts else 0
         for i, (bar, v) in enumerate(zip(bars, counts)):
 
             height = bar.get_height()
 
-            # Position label above bar with some padding
             ax2.text(bar.get_x() + bar.get_width() / 2., height + max_count * 0.01,
 
                     str(v), ha="center", va="bottom", fontsize=8)
 
         ax2.grid(axis="y", alpha=0.3)
 
-        # Adjust layout to prevent label cutoff
         plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     else:
@@ -355,8 +295,6 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
     pdf.savefig(fig, bbox_inches="tight")
 
     plt.close(fig)
-
-    # Optional: Instructor comparison page
 
     if instructors:
 
@@ -402,13 +340,9 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
 
         totals = instr.get("totals", {}) or {}
 
-        # Page 1: header + bar chart
-
         fig, ax = plt.subplots(figsize=(11.7, 8.3))
 
         fig.suptitle(f"Instructor: {name}", fontsize=14, fontweight="bold", color=THEME_COLORS["primary"])
-
-        # Header box
 
         ax.set_facecolor(THEME_COLORS["light_bg"])
 
@@ -436,8 +370,6 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
 
             y -= 0.05
 
-        # Activity type chart
-
         if totals:
 
             activity_types = list(totals.keys())
@@ -446,10 +378,7 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
 
             time_spent = [totals[a]["timeSpent"] for a in activity_types]
 
-            # Abbreviate long labels for better readability
             abbreviated_types = [at[:15] + "..." if len(at) > 15 else at for at in activity_types]
-
-            # add axes overlay (for chart) with more space at bottom for labels
 
             chart_ax = fig.add_axes([0.1, 0.15, 0.8, 0.4])
 
@@ -463,13 +392,11 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
 
             chart_ax.tick_params(axis="x", rotation=45, labelsize=8)
 
-            # Add value labels on bars with better positioning
             max_count = max(counts) if counts else 0
             for i, (bar, v) in enumerate(zip(bars, counts)):
 
                 height = bar.get_height()
 
-                # Position label above bar with some padding
                 chart_ax.text(bar.get_x() + bar.get_width() / 2., height + max_count * 0.01,
 
                         str(v), ha="center", va="bottom", fontsize=8)
@@ -479,8 +406,6 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
         pdf.savefig(fig, bbox_inches="tight")
 
         plt.close(fig)
-
-        # Page 2: table of activity type stats
 
         if totals:
 
@@ -542,8 +467,6 @@ def generate_pdf_report(report_data: dict, report_type: str) -> bytes:
 
     return buffer.getvalue()
 
-# --------- EXCEL GENERATION --------- #
-
 def style_worksheet(ws):
 
     header_fill = PatternFill(start_color="003f5c", end_color="003f5c", fill_type="solid")
@@ -561,10 +484,7 @@ def style_worksheet(ws):
         top=Side(style="thin"),
 
         bottom=Side(style="thin"),
-
     )
-
-    # Header styling
 
     for col in range(1, ws.max_column + 1):
 
@@ -577,8 +497,6 @@ def style_worksheet(ws):
         cell.alignment = center_alignment
 
         cell.border = thin_border
-
-    # Body styling + borders + alternate row color
 
     for row in range(2, ws.max_row + 1):
 
@@ -598,8 +516,6 @@ def style_worksheet(ws):
 
             cell.border = thin_border
 
-    # Auto column widths
-
     for col in range(1, ws.max_column + 1):
 
         column_letter = get_column_letter(col)
@@ -616,8 +532,6 @@ def style_worksheet(ws):
 
         ws.column_dimensions[column_letter].width = max(12, min(max_length + 2, 40))
 
-    # Freeze header row
-
     ws.freeze_panes = "A2"
 
 def generate_excel_report(report_data: dict, report_type: str) -> bytes:
@@ -629,8 +543,6 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
     overall = build_overall_summary(report_data)
 
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-
-        # --- Summary Sheet --- #
 
         summary_rows = []
 
@@ -690,8 +602,6 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
 
         style_worksheet(ws_summary)
 
-        # Write overall numbers at the bottom
-
         last_row = ws_summary.max_row + 2
 
         ws_summary[f"A{last_row}"] = "Overall Totals"
@@ -713,8 +623,6 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
         ws_summary[f"A{last_row + 4}"] = "Completion Rate (%)"
 
         ws_summary[f"B{last_row + 4}"] = overall["completionRate"]
-
-        # --- Per-Instructor Sheets --- #
 
         for instr in instructors:
 
@@ -759,8 +667,6 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
     buffer.seek(0)
 
     return buffer.getvalue()
-
-# --------- MAIN ENTRY POINT --------- #
 
 def main():
 

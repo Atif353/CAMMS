@@ -81,12 +81,10 @@ const ProfilePage = () => {
       setUserData(updatedUser);
       setEditing(false);
       
-      // Dispatch event to update user in context
       window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
       
       toast.success('Profile updated successfully');
       
-      // Reset password fields
       setFormData({
         ...formData,
         currentPassword: '',
@@ -130,7 +128,6 @@ const ProfilePage = () => {
       setUserData(updatedUser);
       setImageKey(prev => prev + 1);
       
-      // Dispatch event to update user in context
       window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
       
       toast.success('Profile image uploaded successfully');
@@ -187,7 +184,6 @@ const ProfilePage = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 dark:border-gray-700">
-          {/* Profile Image Section */}
           <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 mb-8 pb-8 border-b border-gray-200 dark:border-gray-600">
             <div className="relative">
               <img

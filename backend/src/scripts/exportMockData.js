@@ -6,28 +6,18 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * Export Mock LMS Dataset
- * 
- * This script exports all database data to CSV and JSON formats
- * for use as a mock LMS dataset.
- */
-
 async function exportMockData() {
   try {
     console.log('📊 Starting mock LMS dataset export...');
 
-    // Create exports directory if it doesn't exist
     const exportsDir = path.join(__dirname, '../../exports');
     if (!fs.existsSync(exportsDir)) {
       fs.mkdirSync(exportsDir, { recursive: true });
     }
 
-    // Known passwords from seed script (since passwords are hashed in DB)
     const ADMIN_PASSWORD = 'Admin@2024#Secure';
     const INSTRUCTOR_PASSWORD = 'Instructor@2024#Secure';
 
-    // Export Users
     const users = await prisma.user.findMany({
       include: {
         role: true,
@@ -60,7 +50,6 @@ async function exportMockData() {
     fs.writeFileSync(path.join(exportsDir, 'users.json'), usersJSON);
     console.log(`✅ Exported ${users.length} users (with passwords)`);
 
-    // Create credentials file for easy reference
     const credentials = {
       exportDate: new Date().toISOString(),
       note: 'These are the plain text passwords used during seeding. Passwords in the database are hashed.',
@@ -78,7 +67,6 @@ async function exportMockData() {
     );
     console.log('✅ Created credentials.json with email/password mappings');
 
-    // Export Activities
     const activities = await prisma.activity.findMany({
       include: {
         instructor: {
@@ -164,7 +152,6 @@ async function exportMockData() {
     fs.writeFileSync(path.join(exportsDir, 'activity_types.json'), activityTypesJSON);
     console.log(`✅ Exported ${activityTypes.length} activity types`);
 
-    // Export Roles
     const roles = await prisma.role.findMany();
 
     const rolesCSV = convertToCSV(roles.map(r => ({
@@ -208,7 +195,6 @@ async function exportMockData() {
     fs.writeFileSync(path.join(exportsDir, 'system_settings.json'), settingsJSON);
     console.log(`✅ Exported ${settings.length} system settings`);
 
-    // Export Notifications
     const notifications = await prisma.notification.findMany({
       include: {
         user: {
@@ -415,24 +401,18 @@ All passwords are included in:
   }
 }
 
-/**
- * Convert array of objects to CSV format
- */
 function convertToCSV(data) {
   if (data.length === 0) return '';
 
   const headers = Object.keys(data[0]);
   const csvRows = [];
 
-  // Add headers
   csvRows.push(headers.join(','));
 
-  // Add data rows
   for (const row of data) {
     const values = headers.map(header => {
       const value = row[header];
       if (value === null || value === undefined) return '';
-      // Escape commas and quotes in CSV
       const stringValue = String(value);
       if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
         return `"${stringValue.replace(/"/g, '""')}"`;

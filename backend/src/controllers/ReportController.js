@@ -18,8 +18,6 @@ export const ReportController = {
         filters: req.body.filters || {},
       };
 
-      // Generate report and file in one go - auto-download
-      // This creates ONE record and returns the file
       const result = await ReportService.generateReportFile(
         req.user.id,
         reportData,
@@ -28,7 +26,6 @@ export const ReportController = {
       );
 
       if (result.buffer) {
-        // Return file for download
         res.setHeader('Content-Type', result.mimeType);
         res.setHeader(
           'Content-Disposition',
@@ -38,7 +35,6 @@ export const ReportController = {
         res.setHeader('Cache-Control', 'no-cache');
         res.send(result.buffer);
       } else if (result.data) {
-        // Python unavailable - return JSON data instead
         res.status(200).json({
           success: true,
           message: result.error || 'Report generated in JSON format (Python service unavailable)',
@@ -46,7 +42,6 @@ export const ReportController = {
           format: 'json',
         });
       } else {
-        // If file generation fails completely
         res.status(500).json({
           success: false,
           message: result.error || 'Failed to generate report file',
@@ -66,7 +61,7 @@ export const ReportController = {
         startDate: req.body.startDate,
         endDate: req.body.endDate,
         filters: req.body.filters,
-        reportId: req.body.reportId || null, // Reuse existing report if provided
+        reportId: req.body.reportId || null,
       };
 
       const result = await ReportService.generateReportFile(
