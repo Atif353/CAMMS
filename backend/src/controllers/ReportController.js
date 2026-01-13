@@ -1,10 +1,7 @@
 import { ReportService } from '../services/ReportService.js';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { PROJECT_ROOT } from '../config/paths.js';
 
 export const ReportController = {
   async generateReport(req, res, next) {
@@ -108,7 +105,7 @@ export const ReportController = {
       const offset = (pageNum - 1) * limitNum;
 
       const filters = {
-        generatedBy: req.user.role === 'ADMIN' ? undefined : req.user.id,
+        generatedBy: req.user.role === 'ADMIN' ? undefined : undefined,
         reportType,
         instructorId: req.user.role === 'ADMIN' ? instructorId : req.user.id,
         limit: limitNum,
@@ -161,6 +158,22 @@ export const ReportController = {
       }
       const report = await ReportService.getReportById(req.params.id);
       
+      if (!report) {
+        return res.status(404).json({
+          success: false,
+          message: 'Report not found',
+        });
+      }
+
+      if (req.user.role !== 'ADMIN') {
+        if (report.instructor_id && report.instructor_id !== req.user.id) {
+          return res.status(403).json({
+            success: false,
+            message: 'Unauthorized: You can only download reports for yourself',
+          });
+        }
+      }
+      
       if (!report.filePath) {
         return res.status(404).json({
           success: false,
@@ -170,10 +183,9 @@ export const ReportController = {
 
       let filePath;
       if (report.filePath.startsWith('uploads/')) {
-        filePath = path.join(__dirname, '../../..', report.filePath);
+        filePath = path.join(PROJECT_ROOT, report.filePath);
       } else {
-        const uploadsDir = path.join(__dirname, '../../..', 'uploads');
-        filePath = path.join(uploadsDir, path.basename(report.filePath));
+        filePath = path.join(PROJECT_ROOT, 'uploads', path.basename(report.filePath));
       }
 
       if (!fs.existsSync(filePath)) {

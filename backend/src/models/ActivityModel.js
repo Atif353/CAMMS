@@ -128,13 +128,23 @@ export const ActivityModel = {
     }
 
     if (filters.search) {
-      where.OR = [
-        { title: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
-        { courseCode: { contains: filters.search, mode: 'insensitive' } },
-        { instructor: { name: { contains: filters.search, mode: 'insensitive' } } },
-        { instructor: { email: { contains: filters.search, mode: 'insensitive' } } },
-      ];
+      // When instructorId is set, only search in title, description, and courseCode
+      // When instructorId is not set (admin view), also search by instructor name/email
+      if (instructorId) {
+        where.OR = [
+          { title: { contains: filters.search, mode: 'insensitive' } },
+          { description: { contains: filters.search, mode: 'insensitive' } },
+          { courseCode: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      } else {
+        where.OR = [
+          { title: { contains: filters.search, mode: 'insensitive' } },
+          { description: { contains: filters.search, mode: 'insensitive' } },
+          { courseCode: { contains: filters.search, mode: 'insensitive' } },
+          { instructor: { name: { contains: filters.search, mode: 'insensitive' } } },
+          { instructor: { email: { contains: filters.search, mode: 'insensitive' } } },
+        ];
+      }
     }
 
     const activities = await prisma.activity.findMany({
@@ -382,13 +392,23 @@ export const ActivityModel = {
     }
 
     if (filters.search) {
-      where.OR = [
-        { title: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
-        { courseCode: { contains: filters.search, mode: 'insensitive' } },
-        { instructor: { name: { contains: filters.search, mode: 'insensitive' } } },
-        { instructor: { email: { contains: filters.search, mode: 'insensitive' } } },
-      ];
+      // When instructorId is set, only search in title, description, and courseCode
+      // When instructorId is not set (admin view), also search by instructor name/email
+      if (instructorId) {
+        where.OR = [
+          { title: { contains: filters.search, mode: 'insensitive' } },
+          { description: { contains: filters.search, mode: 'insensitive' } },
+          { courseCode: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      } else {
+        where.OR = [
+          { title: { contains: filters.search, mode: 'insensitive' } },
+          { description: { contains: filters.search, mode: 'insensitive' } },
+          { courseCode: { contains: filters.search, mode: 'insensitive' } },
+          { instructor: { name: { contains: filters.search, mode: 'insensitive' } } },
+          { instructor: { email: { contains: filters.search, mode: 'insensitive' } } },
+        ];
+      }
     }
 
     return await prisma.activity.count({ where });

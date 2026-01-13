@@ -166,10 +166,11 @@ export const generateReportWithPython = (
       }
     });
 
+    // Increased timeout to 60 seconds for large reports, but optimizations should make it faster
     setTimeout(() => {
       pythonProcess.kill();
       reject(new Error("Python process timeout"));
-    }, 30000);
+    }, 60000);
   });
 };
 

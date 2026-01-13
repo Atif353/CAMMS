@@ -54,12 +54,14 @@ export const UserModel = {
     };
   },
 
-  async findById(id) {
+  async findById(id, includeInactive = false) {
+    const where = { id };
+    if (!includeInactive) {
+      where.isActive = true;
+    }
+
     const user = await prisma.user.findFirst({
-      where: {
-        id,
-        isActive: true,
-      },
+      where,
       include: {
         role: {
           select: {
@@ -185,6 +187,13 @@ export const UserModel = {
       where.role = {
         name: filters.role,
       };
+    }
+
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { email: { contains: filters.search, mode: 'insensitive' } },
+      ];
     }
 
     return await prisma.user.count({ where });

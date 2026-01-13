@@ -32,7 +32,6 @@ const updateUserSchema = Joi.object({
  */
 
 router.use(authMiddleware);
-router.use(roleMiddleware('ADMIN'));
 
 /**
  * @swagger
@@ -95,7 +94,7 @@ router.use(roleMiddleware('ADMIN'));
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.post('/', validateRequest(createUserSchema), UserController.createUser);
+router.post('/', roleMiddleware('ADMIN'), validateRequest(createUserSchema), UserController.createUser);
 
 /**
  * @swagger
@@ -159,7 +158,7 @@ router.post('/', validateRequest(createUserSchema), UserController.createUser);
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/', UserController.getAllUsers);
+router.get('/', roleMiddleware('ADMIN'), UserController.getAllUsers);
 
 /**
  * @swagger
@@ -298,7 +297,7 @@ router.put('/:id', validateRequest(updateUserSchema), UserController.updateUser)
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.delete('/:id', UserController.deleteUser);
+router.delete('/:id', roleMiddleware('ADMIN'), UserController.deleteUser);
 
 export default router;
 

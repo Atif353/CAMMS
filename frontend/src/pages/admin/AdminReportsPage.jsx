@@ -165,30 +165,28 @@ const AdminReportsPage = () => {
 
   const handleDownloadPrevious = async (report) => {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${baseUrl}/api/reports/${report.id}/download`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `report_${report.reportType}_${format(new Date(report.createdAt), 'yyyy-MM-dd')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-
-        toast.success('Report downloaded successfully');
-      } else {
-        throw new Error('Download failed');
+      const response = await reportApi.download(report.id);
+      
+      if (response.isJson) {
+        toast.error(response.data?.message || 'Failed to download report');
+        return;
       }
+
+      const blob = response.data instanceof Blob ? response.data : new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      const fileExtension = report.filePath?.split('.').pop() || 'pdf';
+      a.download = `report_${report.reportType}_${format(new Date(report.createdAt), 'yyyy-MM-dd')}.${fileExtension}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Report downloaded successfully');
     } catch (error) {
-      toast.error('Failed to download report. File may not exist. Please regenerate the report.');
+      toast.error(error.response?.data?.message || 'Failed to download report. File may not exist. Please regenerate the report.');
     }
   };
 
@@ -470,7 +468,7 @@ const AdminReportsPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200">
-                        {report.instructorId ? 'Specific Instructor' : 'All Instructors'}
+                        {report.instructorName || (report.instructorId ? 'Unknown Instructor' : 'All Instructors')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200">
                         <div className="flex items-center space-x-1">

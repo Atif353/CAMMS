@@ -8,7 +8,7 @@ import { FiUser, FiMail, FiPhone, FiShield, FiLock, FiEdit, FiSave, FiUpload } f
 import httpClient from '../api/httpClient';
 
 const ProfilePage = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -90,6 +90,13 @@ const ProfilePage = () => {
       setUserData(updatedUser);
       setEditing(false);
       
+      updateUser({
+        ...user,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        profile_image: updatedUser.profile_image,
+      });
+      
       window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
       
       toast.success('Profile updated successfully');
@@ -127,24 +134,28 @@ const ProfilePage = () => {
       const formData = new FormData();
       formData.append('profileImage', file);
 
-      const response = await httpClient.post('/users/upload-profile-image', formData, {
+      const response = await httpClient.post('/upload/profile-image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      const updatedUser = response?.data?.data;
-      
-      if (!updatedUser) {
+      if (response?.data?.success) {
+        const updatedResponse = await userApi.getById(user.id);
+        const updatedUserData = updatedResponse?.data?.data;
+        if (updatedUserData) {
+          setUserData(updatedUserData);
+          updateUser({
+            ...user,
+            profile_image: updatedUserData.profile_image,
+          });
+          setImageKey(prev => prev + 1);
+          window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUserData }));
+        }
+        toast.success('Profile image uploaded successfully');
+      } else {
         throw new Error('Failed to update profile image');
       }
-      
-      setUserData(updatedUser);
-      setImageKey(prev => prev + 1);
-      
-      window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
-      
-      toast.success('Profile image uploaded successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to upload image');
     } finally {
@@ -207,11 +218,19 @@ const ProfilePage = () => {
                     if (profileImg.startsWith('http')) {
                       return profileImg;
                     }
+                    if (profileImg.startsWith('uploads/')) {
+                      let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                      if (baseUrl.endsWith('/api')) {
+                        baseUrl = baseUrl.replace('/api', '');
+                      }
+                      return `${baseUrl}/${profileImg}?v=${imageKey}`;
+                    }
                     if (profileImg.startsWith('/assets')) {
                       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                       return `${apiUrl}${profileImg}?v=${imageKey}`;
                     }
-                    return `${profileImg}?v=${imageKey}`;
+                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                    return `${apiUrl}/${profileImg}?v=${imageKey}`;
                   }
                   return getProfileImage(userData || user, user?.id);
                 })()}

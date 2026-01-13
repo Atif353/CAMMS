@@ -74,11 +74,19 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (userData) => {
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+    }
+  };
+
   const value = {
     user,
     login,
     signup,
     logout,
+    updateUser,
     loading,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',

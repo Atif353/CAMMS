@@ -220,17 +220,17 @@ const InstructorDashboardPage = () => {
                 </p>
                 {dateRange === 'yearly' && dashboard?.weekStats?.totalTimeSpent > 0 && (
                   <p className="text-xs text-emerald-500 dark:text-emerald-400 opacity-75 mt-1">
-                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 12 / 30 / 24 / 60 * 10) / 10} hrs/month avg
+                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 365 / 60 * 10) / 10} hrs/day avg
                   </p>
                 )}
                 {dateRange === 'monthly' && dashboard?.weekStats?.totalTimeSpent > 0 && (
                   <p className="text-xs text-emerald-500 dark:text-emerald-400 opacity-75 mt-1">
-                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 30 / 24 / 60 * 10) / 10} hrs/day avg
+                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 30 / 60 * 10) / 10} hrs/day avg
                   </p>
                 )}
                 {dateRange === 'weekly' && dashboard?.weekStats?.totalTimeSpent > 0 && (
                   <p className="text-xs text-emerald-500 dark:text-emerald-400 opacity-75 mt-1">
-                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 7 / 24 / 60 * 10) / 10} hrs/day avg
+                    ~{Math.round((dashboard?.weekStats?.totalTimeSpent || 0) / 7 / 60 * 10) / 10} hrs/day avg
                   </p>
                 )}
                 <p className="text-emerald-500 dark:text-emerald-400 text-xs mt-2 font-medium">

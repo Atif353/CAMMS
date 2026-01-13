@@ -65,7 +65,24 @@ export const UserController = {
 
   async updateUser(req, res, next) {
     try {
-      const user = await UserService.updateUser(req.params.id, req.body);
+      const userId = req.params.id;
+      const isAdmin = req.user.role === 'ADMIN';
+      
+      if (!isAdmin && req.user.id !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Insufficient permissions: You can only update your own profile',
+        });
+      }
+
+      const updateData = { ...req.body };
+      
+      if (!isAdmin) {
+        delete updateData.role;
+        delete updateData.isActive;
+      }
+
+      const user = await UserService.updateUser(userId, updateData);
       res.status(200).json({
         success: true,
         message: 'User updated successfully',

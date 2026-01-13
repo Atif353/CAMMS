@@ -12,6 +12,7 @@ import { swaggerSpec } from "./config/swagger.js";
 import { validateEnv } from "./config/validateEnv.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 import { sanitizeInput } from "./middleware/sanitize.js";
+import { PROJECT_ROOT } from "./config/paths.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,10 +29,16 @@ import fs from "fs";
 
 dotenv.config();
 
-const uploadsDir = path.join(__dirname, "../../uploads");
+const uploadsDir = path.join(PROJECT_ROOT, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   logger.info(`📁 Created uploads directory: ${uploadsDir}`);
+}
+
+const imagesDir = path.join(PROJECT_ROOT, "uploads", "Images");
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
+  logger.info(`📁 Created Images directory: ${imagesDir}`);
 }
 
 try {
@@ -99,6 +106,15 @@ const assetsPath = path.join(__dirname, "../../frontend/public/assets");
 app.use(
   "/assets",
   express.static(assetsPath, {
+    setHeaders: (res) => {
+      res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  })
+);
+
+app.use(
+  "/uploads",
+  express.static(path.join(PROJECT_ROOT, "uploads"), {
     setHeaders: (res) => {
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
     },

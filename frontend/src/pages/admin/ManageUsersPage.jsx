@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { userApi } from '../../api/userApi';
 import Swal from 'sweetalert2';
@@ -8,22 +9,14 @@ import { getProfileImage } from '../../utils/profileImage';
 import { useToast } from '../../components/Toast';
 
 const ManageUsersPage = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({});
   const toast = useToast();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'INSTRUCTOR',
-    phone: '',
-    isActive: true,
-  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -59,32 +52,11 @@ const ManageUsersPage = () => {
   };
 
   const handleCreate = () => {
-    setEditingUser(null);
-    setFormData({ name: '', email: '', password: '', role: 'INSTRUCTOR', phone: '', isActive: true });
-    setShowModal(true);
+    navigate('/admin/users/create');
   };
 
   const handleEdit = (user) => {
-    setEditingUser(user);
-    setFormData({ name: user.name, email: user.email, password: '', role: user.role, phone: user.phone || '', isActive: user.isActive });
-    setShowModal(true);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingUser) {
-        await userApi.update(editingUser.id, formData);
-        toast.success('User updated successfully');
-      } else {
-        await userApi.create(formData);
-        toast.success('User created successfully');
-      }
-      setShowModal(false);
-      fetchUsers();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
-    }
+    navigate(`/admin/users/${user.id}/edit`);
   };
 
   const handleDelete = async (id) => {
@@ -194,7 +166,30 @@ const ManageUsersPage = () => {
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2 sm:space-x-3">
                         <img
-                          src={user.profile_image ? `${user.profile_image}?t=${Date.now()}` : getProfileImage(user, user.id)}
+                          src={(() => {
+                            if (!user.profile_image) return getProfileImage(user, user.id);
+                            const img = user.profile_image;
+                            if (img.startsWith('http')) return img;
+                            if (img.startsWith('uploads/')) {
+                              let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                              if (baseUrl.endsWith('/api')) {
+                                baseUrl = baseUrl.replace('/api', '');
+                              }
+                              return `${baseUrl}/${img}?t=${Date.now()}`;
+                            }
+                            if (img.startsWith('/assets')) {
+                              let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                              if (baseUrl.endsWith('/api')) {
+                                baseUrl = baseUrl.replace('/api', '');
+                              }
+                              return `${baseUrl}${img}?t=${Date.now()}`;
+                            }
+                            let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                            if (baseUrl.endsWith('/api')) {
+                              baseUrl = baseUrl.replace('/api', '');
+                            }
+                            return `${baseUrl}/${img}?t=${Date.now()}`;
+                          })()}
                           alt={user.name}
                           className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-blue-200 shadow-sm"
                           onError={(e) => {
@@ -230,7 +225,19 @@ const ManageUsersPage = () => {
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
                       <div className="relative">
                         <button
-                          onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
+                          onClick={(e) => {
+                            const buttonRect = e.currentTarget.getBoundingClientRect();
+                            const viewportHeight = window.innerHeight;
+                            const menuHeight = 150; // Approximate menu height
+                            const spaceBelow = viewportHeight - buttonRect.bottom;
+                            const spaceAbove = buttonRect.top;
+                            const showAbove = spaceBelow < menuHeight && spaceAbove > menuHeight;
+                            
+                            setMenuPosition({
+                              [user.id]: showAbove ? 'above' : 'below'
+                            });
+                            setOpenMenuId(openMenuId === user.id ? null : user.id);
+                          }}
                           className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-100 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                           title="Actions"
                         >
@@ -242,13 +249,17 @@ const ManageUsersPage = () => {
                               className="fixed inset-0 z-10" 
                               onClick={() => setOpenMenuId(null)}
                             />
-                            <div className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 z-30 py-1">
+                            <div className={`absolute right-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 z-30 py-1 ${
+                              menuPosition[user.id] === 'above' 
+                                ? 'bottom-full mb-2' 
+                                : 'top-full mt-2'
+                            }`}>
                               <button
                                 onClick={() => {
                                   handleEdit(user);
                                   setOpenMenuId(null);
                                 }}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2 transition-colors"
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400 flex items-center space-x-2 transition-colors"
                               >
                                 <FiEdit className="text-base" />
                                 <span>Edit</span>
@@ -258,7 +269,7 @@ const ManageUsersPage = () => {
                                   handleDelete(user.id);
                                   setOpenMenuId(null);
                                 }}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-red-50 hover:text-red-700 flex items-center space-x-2 transition-colors"
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-400 flex items-center space-x-2 transition-colors"
                               >
                                 <FiTrash2 className="text-base" />
                                 <span>Delete</span>
@@ -279,122 +290,6 @@ const ManageUsersPage = () => {
             onPageChange={setCurrentPage}
           />
         </div>
-
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-md w-full animate-slideUp border border-gray-100 dark:border-gray-700">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
-                {editingUser ? (
-                  <>
-                    <FiEdit className="text-blue-600" />
-                    <span>Edit User</span>
-                  </>
-                ) : (
-                  <>
-                    <FiUserPlus className="text-blue-600" />
-                    <span>Create New User</span>
-                  </>
-                )}
-              </h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2">
-                    <FiUser />
-                    <span>Name</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2">
-                    <FiMail />
-                    <span>Email</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2">
-                    <FiPhone />
-                    <span>Phone (Optional)</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    {editingUser ? 'New Password (leave blank to keep current)' : 'Password'}
-                  </label>
-                  <input
-                    type="password"
-                    required={!editingUser}
-                    minLength={6}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center space-x-2">
-                    <FiShield />
-                    <span>Role</span>
-                  </label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  >
-                    <option value="INSTRUCTOR">Instructor</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
-                </div>
-                {editingUser && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Status</label>
-                    <select
-                      value={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                    >
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </div>
-                )}
-                <div className="flex justify-end space-x-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 dark:text-gray-200 font-semibold rounded-lg transition-all duration-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-                  >
-                    {editingUser ? 'Update' : 'Create'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   );

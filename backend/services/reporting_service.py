@@ -39,6 +39,10 @@ plt.rcParams.update({
     "axes.grid": True,
     "grid.alpha": 0.3,
     "axes.axisbelow": True,
+    "figure.dpi": 100,
+    "savefig.dpi": 100,
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.1,
 })
 
 def build_overall_summary(report_data: dict) -> dict:
@@ -91,7 +95,7 @@ def format_time(minutes):
     return f"{int(hours)} hr {mins} min"
 
 def add_title_page(pdf: PdfPages, report_data: dict, report_type: str):
-    fig = plt.figure(figsize=(11.7, 8.3))
+    fig = plt.figure(figsize=(11.7, 8.3), dpi=100)
     ax = fig.add_subplot(111)
     ax.set_facecolor(THEME_COLORS["primary"])
     ax.axis("off")
@@ -107,9 +111,13 @@ def add_title_page(pdf: PdfPages, report_data: dict, report_type: str):
         fontsize=24, color="white", weight="bold"
     )
 
+    if not report_type or (isinstance(report_type, str) and report_type.strip() == ""):
+        report_title = "Custom"
+    else:
+        report_title = str(report_type).title()
     fig.text(
         0.5, 0.65,
-        f"{report_type.title()} Activity Report",
+        f"{report_title} Activity Report",
         ha="center", va="center",
         fontsize=18, color="#ecf0f1"
     )
@@ -135,14 +143,14 @@ def add_title_page(pdf: PdfPages, report_data: dict, report_type: str):
         fontsize=8, color="#ecf0f1"
     )
 
-    pdf.savefig(fig, bbox_inches="tight")
+    pdf.savefig(fig, bbox_inches="tight", dpi=100)
     plt.close(fig)
 
 def add_overall_summary_page(pdf: PdfPages, report_data: dict):
     overall = build_overall_summary(report_data)
     instructors = report_data.get("instructorSummary", [])
 
-    fig, axes = plt.subplots(1, 2, figsize=(11.7, 8.3))
+    fig, axes = plt.subplots(1, 2, figsize=(11.7, 8.3), dpi=100)
     fig.suptitle("Executive Summary", fontsize=16, fontweight="bold", color=THEME_COLORS["primary"])
 
     ax = axes[0]
@@ -204,11 +212,11 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
         )
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    pdf.savefig(fig, bbox_inches="tight")
+    pdf.savefig(fig, bbox_inches="tight", dpi=100)
     plt.close(fig)
 
     if len(instructors) > 1:
-        fig, ax = plt.subplots(figsize=(11.7, 8.3))
+        fig, ax = plt.subplots(figsize=(11.7, 8.3), dpi=100)
         names = [i.get("name", "Unknown")[:25] + "..." if len(i.get("name", "Unknown")) > 25 else i.get("name", "Unknown") for i in instructors]
         times = [i.get("overallTimeSpent", 0) for i in instructors]
 
@@ -233,7 +241,7 @@ def add_overall_summary_page(pdf: PdfPages, report_data: dict):
                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=THEME_COLORS["primary"], alpha=0.8))
 
         plt.tight_layout()
-        pdf.savefig(fig, bbox_inches="tight")
+        pdf.savefig(fig, bbox_inches="tight", dpi=100)
         plt.close(fig)
 
 def add_instructor_pages(pdf: PdfPages, report_data: dict):
@@ -247,7 +255,7 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
         email = instr.get("email", "N/A")
         totals = instr.get("totals", {}) or {}
 
-        fig, axes = plt.subplots(2, 1, figsize=(11.7, 8.3), height_ratios=[1, 2])
+        fig, axes = plt.subplots(2, 1, figsize=(11.7, 8.3), height_ratios=[1, 2], dpi=100)
         fig.suptitle(f"Instructor: {name}", fontsize=14, fontweight="bold", color=THEME_COLORS["primary"])
 
         ax_info = axes[0]
@@ -297,11 +305,11 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
                         bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=THEME_COLORS["primary"], alpha=0.8))
 
         plt.tight_layout(rect=[0, 0, 1, 0.95])
-        pdf.savefig(fig, bbox_inches="tight")
+        pdf.savefig(fig, bbox_inches="tight", dpi=100)
         plt.close(fig)
 
         if totals:
-            fig2, ax2 = plt.subplots(figsize=(11.7, 8.3))
+            fig2, ax2 = plt.subplots(figsize=(11.7, 8.3), dpi=100)
             ax2.axis("off")
             ax2.set_facecolor(THEME_COLORS["light_bg"])
 
@@ -338,12 +346,12 @@ def add_instructor_pages(pdf: PdfPages, report_data: dict):
                     cell.set_edgecolor(THEME_COLORS["grid"])
 
             ax2.set_title("Activity Breakdown", fontsize=12, fontweight="bold", pad=20)
-            pdf.savefig(fig2, bbox_inches="tight")
+            pdf.savefig(fig2, bbox_inches="tight", dpi=100)
             plt.close(fig2)
 
 def generate_pdf_report(report_data: dict, report_type: str) -> bytes:
     buffer = io.BytesIO()
-    with PdfPages(buffer) as pdf:
+    with PdfPages(buffer, metadata={'Creator': 'CAMMS'}) as pdf:
         add_title_page(pdf, report_data, report_type)
         add_overall_summary_page(pdf, report_data)
         add_instructor_pages(pdf, report_data)
@@ -361,6 +369,7 @@ def style_worksheet(ws):
         top=Side(style="thin", color="000000"),
         bottom=Side(style="thin", color="000000"),
     )
+    even_row_fill = PatternFill(start_color="f7f9fb", end_color="f7f9fb", fill_type="solid")
 
     for col in range(1, ws.max_column + 1):
         cell = ws.cell(row=1, column=col)
@@ -369,26 +378,26 @@ def style_worksheet(ws):
         cell.alignment = center_alignment
         cell.border = thin_border
 
-    for row in range(2, ws.max_row + 1):
-        fill = None
-        if row % 2 == 0:
-            fill = PatternFill(start_color="f7f9fb", end_color="f7f9fb", fill_type="solid")
-
-        for col in range(1, ws.max_column + 1):
+    max_row = ws.max_row
+    max_col = ws.max_column
+    
+    for row in range(2, max_row + 1):
+        is_even = row % 2 == 0
+        for col in range(1, max_col + 1):
             cell = ws.cell(row=row, column=col)
-            if fill:
-                cell.fill = fill
+            if is_even:
+                cell.fill = even_row_fill
             cell.border = thin_border
-            if col == 1:
-                cell.alignment = left_alignment
-            else:
-                cell.alignment = center_alignment
+            cell.alignment = left_alignment if col == 1 else center_alignment
 
-    for col in range(1, ws.max_column + 1):
+    # Optimize column width calculation
+    for col in range(1, max_col + 1):
         column_letter = get_column_letter(col)
         max_length = 0
-        for row in range(1, ws.max_row + 1):
-            cell = ws[f"{column_letter}{row}"]
+        # Sample first 100 rows for width calculation to speed up
+        sample_rows = min(100, max_row)
+        for row in range(1, sample_rows + 1):
+            cell = ws.cell(row=row, column=col)
             if cell.value:
                 max_length = max(max_length, len(str(cell.value)))
         ws.column_dimensions[column_letter].width = max(12, min(max_length + 2, 50))
@@ -399,6 +408,9 @@ def add_chart_to_worksheet(ws, chart_type, data_col, title, position):
     try:
         if ws.max_row < 2:
             return
+        
+        if ws.max_row > 1000:
+            return
 
         if chart_type == "bar":
             chart = BarChart()
@@ -407,16 +419,19 @@ def add_chart_to_worksheet(ws, chart_type, data_col, title, position):
             chart.title = title
             chart.y_axis.title = "Value"
             chart.x_axis.title = "Category"
-            data = Reference(ws, min_col=data_col, min_row=1, max_row=ws.max_row)
-            cats = Reference(ws, min_col=1, min_row=2, max_row=ws.max_row)
+            # Limit data range for performance (first 100 rows max)
+            max_data_row = min(ws.max_row, 102)  # 100 data rows + 1 header
+            data = Reference(ws, min_col=data_col, min_row=1, max_row=max_data_row)
+            cats = Reference(ws, min_col=1, min_row=2, max_row=max_data_row)
             chart.add_data(data, titles_from_data=True)
             chart.set_categories(cats)
 
         elif chart_type == "pie":
             chart = PieChart()
             chart.title = title
-            data = Reference(ws, min_col=data_col, min_row=1, max_row=ws.max_row)
-            cats = Reference(ws, min_col=1, min_row=2, max_row=ws.max_row)
+            max_data_row = min(ws.max_row, 102)
+            data = Reference(ws, min_col=data_col, min_row=1, max_row=max_data_row)
+            cats = Reference(ws, min_col=1, min_row=2, max_row=max_data_row)
             chart.add_data(data, titles_from_data=True)
             chart.set_categories(cats)
 
@@ -431,7 +446,7 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
     instructors = report_data.get("instructorSummary", [])
     overall = build_overall_summary(report_data)
 
-    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+    with pd.ExcelWriter(buffer, engine="openpyxl", options={'remove_timezone': True}) as writer:
         summary_rows = []
         for instr in instructors:
             total_activities = 0
@@ -454,15 +469,17 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
                 "Completion Rate (%)": completion_rate,
             })
 
-        df_summary = pd.DataFrame(summary_rows) if summary_rows else pd.DataFrame(
-            columns=[
+        if summary_rows:
+            df_summary = pd.DataFrame(summary_rows)
+        else:
+            df_summary = pd.DataFrame(columns=[
                 "Instructor Name", "Email", "Total Activities",
                 "Total Time Spent (min)", "Completed Activities",
                 "Pending Activities", "Completion Rate (%)",
-            ]
-        )
+            ])
 
-        df_summary.to_excel(writer, sheet_name="Summary", index=False)
+        # Write without index for better performance
+        df_summary.to_excel(writer, sheet_name="Summary", index=False, engine="openpyxl")
         ws_summary = writer.book["Summary"]
         style_worksheet(ws_summary)
 
@@ -513,7 +530,7 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
 
         if activity_type_data:
             df_activity = pd.DataFrame(activity_type_data)
-            df_activity.to_excel(writer, sheet_name="Activity Types", index=False)
+            df_activity.to_excel(writer, sheet_name="Activity Types", index=False, engine="openpyxl")
             ws_activity = writer.book["Activity Types"]
             style_worksheet(ws_activity)
 
@@ -549,7 +566,7 @@ def generate_excel_report(report_data: dict, report_type: str) -> bytes:
 
             df_detail = pd.DataFrame(detail_data)
             sheet_name = (instr.get("name", "Instructor")[:31] or "Instructor").replace("/", "-").replace("\\", "-")
-            df_detail.to_excel(writer, sheet_name=sheet_name, index=False)
+            df_detail.to_excel(writer, sheet_name=sheet_name, index=False, engine="openpyxl")
             ws = writer.book[sheet_name]
             style_worksheet(ws)
 
@@ -568,7 +585,10 @@ def main():
     try:
         input_data = json.load(sys.stdin)
         report_data = input_data.get("reportData", {})
-        report_type = input_data.get("reportType", "WEEKLY")
+        report_type = input_data.get("reportType") or "CUSTOM"
+        if not report_type or report_type.strip() == "":
+            report_type = "CUSTOM"
+        report_type = str(report_type).strip()
         output_format = input_data.get("outputFormat", "pdf").lower()
 
         if output_format == "pdf":

@@ -46,7 +46,9 @@ export const ActivityService = {
   },
 
   async getActivitiesByInstructor(instructorId, filters = {}) {
-    const finalInstructorId = filters.getAll ? null : instructorId;
+    // If instructorId is explicitly provided (not null/undefined), always use it (even for admins with getAll)
+    // If getAll is true and no instructorId provided, set to null to get all instructors
+    const finalInstructorId = (instructorId !== null && instructorId !== undefined) ? instructorId : (filters.getAll ? null : instructorId);
     const activities = await ActivityModel.findByInstructor(finalInstructorId, filters);
     return activities.map((activity) => ({
       id: activity.id,
@@ -100,9 +102,9 @@ export const ActivityService = {
     const updatePayload = {};
     if (updateData.title !== undefined) updatePayload.title = updateData.title;
     if (updateData.description !== undefined) updatePayload.description = updateData.description;
-    if (updateData.courseCode !== undefined) updatePayload.course_code = updateData.courseCode;
-    if (updateData.timeSpentMinutes !== undefined) updatePayload.time_spent_minutes = updateData.timeSpentMinutes;
-    if (updateData.activityDate !== undefined) updatePayload.activity_date = updateData.activityDate;
+    if (updateData.courseCode !== undefined) updatePayload.courseCode = updateData.courseCode;
+    if (updateData.timeSpentMinutes !== undefined) updatePayload.timeSpentMinutes = updateData.timeSpentMinutes;
+    if (updateData.activityDate !== undefined) updatePayload.activityDate = updateData.activityDate;
     if (updateData.meta !== undefined) updatePayload.meta = updateData.meta;
     if (updateData.status !== undefined) updatePayload.status = updateData.status;
 
@@ -153,7 +155,9 @@ export const ActivityService = {
   },
 
   async countActivities(instructorId, filters = {}) {
-    const finalInstructorId = filters.getAll ? null : instructorId;
+    // If instructorId is explicitly provided (not null/undefined), always use it (even for admins with getAll)
+    // If getAll is true and no instructorId provided, set to null to get all instructors
+    const finalInstructorId = (instructorId !== null && instructorId !== undefined) ? instructorId : (filters.getAll ? null : instructorId);
     return await ActivityModel.countByInstructor(finalInstructorId, filters);
   },
 };

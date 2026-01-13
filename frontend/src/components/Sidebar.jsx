@@ -51,6 +51,11 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
   }, [isInstructor, location.pathname]);
 
   useEffect(() => {
+    setCurrentUser(user);
+    setImageKey(prev => prev + 1);
+  }, [user]);
+
+  useEffect(() => {
     const handleUserUpdate = (event) => {
       if (event.detail) {
         setCurrentUser(event.detail);
@@ -61,10 +66,6 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
     window.addEventListener('userUpdated', handleUserUpdate);
     return () => window.removeEventListener('userUpdated', handleUserUpdate);
   }, []);
-
-  useEffect(() => {
-    setCurrentUser(user);
-  }, [user]);
 
   useEffect(() => {
     if (onToggle) {
@@ -214,11 +215,19 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
                   const profileImg = profileUser?.profile_image;
                   if (profileImg) {
                     if (profileImg.startsWith('http')) return profileImg;
+                    if (profileImg.startsWith('uploads/')) {
+                      let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                      if (baseUrl.endsWith('/api')) {
+                        baseUrl = baseUrl.replace('/api', '');
+                      }
+                      return `${baseUrl}/${profileImg}?v=${imageKey}`;
+                    }
                     if (profileImg.startsWith('/assets')) {
                       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                       return `${apiUrl}${profileImg}?v=${imageKey}`;
                     }
-                    return `${profileImg}?v=${imageKey}`;
+                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                    return `${apiUrl}/${profileImg}?v=${imageKey}`;
                   }
                   return getProfileImage(profileUser, profileUser?.id);
                 })()}

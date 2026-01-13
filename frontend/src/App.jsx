@@ -8,6 +8,7 @@ import SignupPage from './pages/auth/SignupPage';
 
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ManageUsersPage from './pages/admin/ManageUsersPage';
+import EditUserPage from './pages/admin/EditUserPage';
 import AdminActivitiesPage from './pages/admin/AdminActivitiesPage';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import SettingsPage from './pages/admin/SettingsPage';
@@ -44,6 +45,22 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
                   <ManageUsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/create"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <EditUserPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/:id/edit"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <EditUserPage />
                 </ProtectedRoute>
               }
             />

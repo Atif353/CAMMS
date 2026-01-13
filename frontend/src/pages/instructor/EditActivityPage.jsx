@@ -272,11 +272,11 @@ const EditActivityPage = () => {
               </div>
             )}
 
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
               <button
                 type="button"
                 onClick={() => navigate('/instructor/activities')}
-                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg transition-all duration-200 flex items-center space-x-2"
+                className="w-full sm:w-auto px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
               >
                 <FiXCircle />
                 <span>Cancel</span>
@@ -284,7 +284,7 @@ const EditActivityPage = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 {saving ? (
                   <>

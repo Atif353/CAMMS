@@ -1,28 +1,23 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
+import { PROJECT_ROOT } from '../config/paths.js';
 import { UserModel } from '../models/UserModel.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../../../frontend/public/assets');
+    const uploadPath = path.join(PROJECT_ROOT, 'uploads', 'Images');
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    if (req.user && req.user.id) {
-      cb(null, `profile-${req.user.id}${ext}`);
-    } else {
-      const tempName = `temp-${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`;
-      cb(null, tempName);
+    if (!req.user || !req.user.id) {
+      return cb(new Error('User not authenticated'));
     }
+    const ext = path.extname(file.originalname);
+    cb(null, `profile-${req.user.id}${ext}`);
   },
 });
 
@@ -30,15 +25,10 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (extname && mimetype) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed'));
     }
+    cb(null, true);
   },
 }).single('profileImage');
 
@@ -63,39 +53,25 @@ export const uploadProfileImage = async (req, res, next) => {
         throw new Error('User not authenticated');
       }
 
-      const ext = path.extname(req.file.originalname);
-      const finalFilename = `profile-${req.user.id}${ext}`;
-      const finalPath = path.join(__dirname, '../../../frontend/public/assets', finalFilename);
-
-      const fileExists = fs.existsSync(req.file.path);
-
-      if (!fileExists) {
+      if (!fs.existsSync(req.file.path)) {
         throw new Error('File was not saved by multer');
       }
 
-      if (req.file.filename !== finalFilename) {
-        fs.renameSync(req.file.path, finalPath);
-      }
-
-      const finalExists = fs.existsSync(finalPath);
-
-      if (!finalExists) {
-        throw new Error('File not found at final path');
-      }
-
-      const oldUser = await UserModel.findById(req.user.id);
-      if (oldUser?.profile_image && oldUser.profile_image !== `/assets/${finalFilename}`) {
-        const oldImagePath = path.join(__dirname, '../../../frontend/public', oldUser.profile_image);
-        if (fs.existsSync(oldImagePath)) {
+      const oldUser = await UserModel.findById(req.user.id, true);
+      if (oldUser?.profile_image) {
+        const oldImagePath = oldUser.profile_image.startsWith('uploads/') 
+          ? path.join(PROJECT_ROOT, oldUser.profile_image)
+          : path.join(PROJECT_ROOT, 'uploads', 'Images', path.basename(oldUser.profile_image));
+        if (fs.existsSync(oldImagePath) && oldImagePath !== req.file.path) {
           try {
             fs.unlinkSync(oldImagePath);
           } catch (deleteError) {
-            console.error('⚠️ Error deleting old image:', deleteError);
+            console.error('Error deleting old image:', deleteError);
           }
         }
       }
 
-      const imagePath = `/assets/${finalFilename}`;
+      const imagePath = `uploads/Images/${req.file.filename}`;
       await UserModel.updateProfileImage(req.user.id, imagePath);
 
       res.status(200).json({
@@ -103,12 +79,16 @@ export const uploadProfileImage = async (req, res, next) => {
         message: 'Profile image uploaded successfully',
         data: {
           imagePath,
-          filename: finalFilename,
+          filename: req.file.filename,
         },
       });
     } catch (error) {
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
+      if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error('Error cleaning up file:', unlinkError);
+        }
       }
       next(error);
     }

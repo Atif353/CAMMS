@@ -220,17 +220,17 @@ const AdminDashboardPage = () => {
                 </p>
                 {dateRange === 'yearly' && dashboard?.totalTimeSpent > 0 && (
                   <p className="text-xs text-rose-500 dark:text-rose-400 opacity-75 mt-1">
-                    ~{Math.round((dashboard?.totalTimeSpent || 0) / 12 / 30 / 24 / 60 * 10) / 10} hrs/month avg
+                    ~{Math.round((dashboard?.totalTimeSpent || 0) / 365 / 60 * 10) / 10} hrs/day avg
                   </p>
                 )}
                 {dateRange === 'monthly' && dashboard?.totalTimeSpent > 0 && (
                   <p className="text-xs text-rose-500 dark:text-rose-400 opacity-75 mt-1">
-                    ~{Math.round((dashboard?.totalTimeSpent || 0) / 30 / 24 / 60 * 10) / 10} hrs/day avg
+                    ~{Math.round((dashboard?.totalTimeSpent || 0) / 30 / 60 * 10) / 10} hrs/day avg
                   </p>
                 )}
                 {dateRange === 'weekly' && dashboard?.totalTimeSpent > 0 && (
                   <p className="text-xs text-rose-500 dark:text-rose-400 opacity-75 mt-1">
-                    ~{Math.round((dashboard?.totalTimeSpent || 0) / 7 / 24 / 60 * 10) / 10} hrs/day avg
+                    ~{Math.round((dashboard?.totalTimeSpent || 0) / 7 / 60 * 10) / 10} hrs/day avg
                   </p>
                 )}
                 <p className="text-rose-500 dark:text-rose-400 text-xs mt-2 font-medium">
@@ -450,8 +450,36 @@ const AdminDashboardPage = () => {
                   className="flex items-center justify-between p-4 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl border-2 border-gray-100 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-500 dark:to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
-                      {index + 1}
+                    <div className="relative">
+                      {instructor.profile_image ? (
+                        <img
+                          src={(() => {
+                            const img = instructor.profile_image;
+                            if (img.startsWith('http')) return img;
+                            if (img.startsWith('uploads/')) {
+                              let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                              if (baseUrl.endsWith('/api')) {
+                                baseUrl = baseUrl.replace('/api', '');
+                              }
+                              return `${baseUrl}/${img}`;
+                            }
+                            let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                            if (baseUrl.endsWith('/api')) {
+                              baseUrl = baseUrl.replace('/api', '');
+                            }
+                            return `${baseUrl}/${img}`;
+                          })()}
+                          alt={instructor.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-blue-200 dark:border-blue-600 shadow-md"
+                          onError={(e) => {
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor.name)}&background=3b82f6&color=fff&size=48`;
+                          }}
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-500 dark:to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
+                          {index + 1}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">{instructor.name}</p>

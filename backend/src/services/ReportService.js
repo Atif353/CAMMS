@@ -10,12 +10,9 @@ import { generateReportWithPython } from "../utils/pythonService.js";
 import prisma from "../config/prisma.js";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import { PROJECT_ROOT } from "../config/paths.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const uploadsDir = path.join(__dirname, "../../../uploads");
+const uploadsDir = path.join(PROJECT_ROOT, "uploads");
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -294,9 +291,6 @@ export const ReportService = {
     }
   },
 
-  /**
-   * List reports for admin or instructor.
-   */
   async getReports(filters = {}) {
     const reports = await ReportModel.findAll(filters);
     return reports.map((report) => ({
@@ -305,6 +299,8 @@ export const ReportService = {
       startDate: report.start_date,
       endDate: report.end_date,
       instructorId: report.instructor_id,
+      instructorName: report.instructor_name,
+      instructorEmail: report.instructor_email,
       generatedBy: report.generated_by_name,
       createdAt: report.created_at,
       filePath: report.file_path,
@@ -370,7 +366,7 @@ export const ReportService = {
     if (report.file_path) {
       let filePath;
       if (report.file_path.startsWith("uploads/")) {
-        filePath = path.join(__dirname, "../../../", report.file_path);
+        filePath = path.join(PROJECT_ROOT, report.file_path);
       } else {
         filePath = path.join(uploadsDir, path.basename(report.file_path));
       }

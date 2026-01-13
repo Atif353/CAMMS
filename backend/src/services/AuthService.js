@@ -3,6 +3,7 @@ import { UserModel } from '../models/UserModel.js';
 import { RoleModel } from '../models/RoleModel.js';
 import { SettingModel } from '../models/SettingModel.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
+import prisma from '../config/prisma.js';
 
 export const AuthService = {
   async signup(userData) {
@@ -53,22 +54,39 @@ export const AuthService = {
     const maintenanceSetting = await SettingModel.findByKey('MAINTENANCE_MODE');
     const isMaintenanceMode = maintenanceSetting && maintenanceSetting.value === 'true';
     
-    // Find user by email
-    const user = await UserModel.findByEmail(email);
+    // Find user by email (including inactive users to check status)
+    const user = await prisma.user.findFirst({
+      where: { email },
+      include: {
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
     if (!user) {
       const error = new Error('Invalid credentials');
       error.statusCode = 401;
       throw error;
     }
 
-    if (isMaintenanceMode && user.role_name !== 'ADMIN') {
+    // Check if user is active
+    if (!user.isActive) {
+      const error = new Error('Your account has been deactivated. Please contact an administrator.');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (isMaintenanceMode && user.role.name !== 'ADMIN') {
       const error = new Error('System is currently under maintenance. Only administrators can access the system at this time. Please try again later.');
       error.statusCode = 503;
       throw error;
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
       const error = new Error('Invalid credentials');
       error.statusCode = 401;
@@ -77,7 +95,7 @@ export const AuthService = {
 
     const payload = {
       sub: user.id,
-      role: user.role_name,
+      role: user.role.name,
       email: user.email,
     };
 
@@ -91,8 +109,8 @@ export const AuthService = {
         id: user.id,
         name: user.name,
         email: user.email,
-        profile_image: user.profile_image || null,
-        role: user.role_name,
+        profile_image: user.profileImage || null,
+        role: user.role.name,
       },
     };
   },

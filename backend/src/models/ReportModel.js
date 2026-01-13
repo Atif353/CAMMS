@@ -44,6 +44,12 @@ export const ReportModel = {
             name: true,
           },
         },
+        instructor: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -53,6 +59,8 @@ export const ReportModel = {
       id: report.id,
       generated_by: report.generatedBy,
       instructor_id: report.instructorId,
+      instructor_name: report.instructor?.name || null,
+      instructor_email: report.instructor?.email || null,
       report_type: report.reportType,
       start_date: report.startDate,
       end_date: report.endDate,
@@ -66,11 +74,11 @@ export const ReportModel = {
   async findAll(filters = {}) {
     const where = {};
 
-    if (filters.generatedBy) {
+    if (filters.generatedBy !== undefined && filters.generatedBy !== null) {
       where.generatedBy = filters.generatedBy;
     }
 
-    if (filters.instructorId) {
+    if (filters.instructorId !== undefined && filters.instructorId !== null) {
       where.instructorId = filters.instructorId;
     }
 
@@ -86,6 +94,12 @@ export const ReportModel = {
             name: true,
           },
         },
+        instructor: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -98,6 +112,8 @@ export const ReportModel = {
       id: report.id,
       generated_by: report.generatedBy,
       instructor_id: report.instructorId,
+      instructor_name: report.instructor?.name || null,
+      instructor_email: report.instructor?.email || null,
       report_type: report.reportType,
       start_date: report.startDate,
       end_date: report.endDate,

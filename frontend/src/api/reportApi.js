@@ -60,5 +60,27 @@ export const reportApi = {
   getAll: (params) => httpClient.get('/reports', { params }),
   getById: (id) => httpClient.get(`/reports/${id}`),
   delete: (id) => httpClient.delete(`/reports/${id}`),
+  download: async (id) => {
+    try {
+      const response = await httpClient.get(`/reports/${id}/download`, {
+        responseType: 'blob',
+      });
+      return response;
+    } catch (error) {
+      if (error.response?.data && error.response.data instanceof Blob) {
+        const contentType = error.response.headers['content-type'] || '';
+        if (contentType.includes('application/json')) {
+          const text = await error.response.data.text();
+          try {
+            const jsonData = JSON.parse(text);
+            return { ...error.response, data: jsonData, isJson: true };
+          } catch {
+            throw error;
+          }
+        }
+      }
+      throw error;
+    }
+  },
 };
 

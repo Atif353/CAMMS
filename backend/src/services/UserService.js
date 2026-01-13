@@ -41,7 +41,7 @@ export const UserService = {
   },
 
   async getUserById(id) {
-    const user = await UserModel.findById(id);
+    const user = await UserModel.findById(id, true);
     if (!user) {
       throw new Error('User not found');
     }
@@ -99,7 +99,7 @@ export const UserService = {
       throw new Error('Role not found');
     }
 
-    const updatedUser = await UserModel.findById(user.id);
+    const updatedUser = await UserModel.findById(user.id, true);
     if (!updatedUser) {
       throw new Error('User not found after update');
     }

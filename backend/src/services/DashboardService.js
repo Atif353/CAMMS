@@ -217,6 +217,7 @@ export const DashboardService = {
           id: instructor.id,
           name: instructor.name,
           email: instructor.email,
+          profile_image: instructor.profile_image || null,
           activityCount: activities.length,
           totalTimeSpent: timeMinutes,
           totalTimeSpentDays: timeHours.days,
