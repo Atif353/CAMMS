@@ -48,9 +48,10 @@ const AdminActivitiesPage = () => {
   const fetchInstructors = async () => {
     try {
       const response = await userApi.getInstructors();
-      setInstructors(response.data.data);
+      setInstructors(response?.data?.data || []);
     } catch (error) {
       console.error('Error fetching instructors:', error);
+      setInstructors([]);
     }
   };
 
@@ -66,8 +67,8 @@ const AdminActivitiesPage = () => {
       if (filters.search) params.search = filters.search;
 
       const response = await activityApi.getAll(params);
-      setActivities(response.data.data);
-      if (response.data.pagination) {
+      setActivities(response?.data?.data || []);
+      if (response?.data?.pagination) {
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -155,7 +156,7 @@ const AdminActivitiesPage = () => {
                 className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 font-medium text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-700"
               >
                 <option value="">All Instructors</option>
-                {instructors.map((instructor) => (
+                {(instructors || []).map((instructor) => (
                   <option key={instructor.id} value={instructor.id}>
                     {instructor.name}
                   </option>
@@ -252,7 +253,7 @@ const AdminActivitiesPage = () => {
                     </td>
                   </tr>
                 ) : (
-                  activities.map((activity) => (
+                  (activities || []).map((activity) => (
                     <tr key={activity.id} className="hover:bg-blue-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">

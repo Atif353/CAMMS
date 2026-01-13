@@ -31,7 +31,12 @@ const ProfilePage = () => {
     try {
       setLoading(true);
       const response = await userApi.getById(user.id);
-      const fetchedUser = response.data.data;
+      const fetchedUser = response?.data?.data;
+      
+      if (!fetchedUser) {
+        throw new Error('User data not found');
+      }
+      
       setUserData(fetchedUser);
       setFormData({
         name: fetchedUser.name || '',
@@ -76,7 +81,11 @@ const ProfilePage = () => {
       }
 
       const response = await userApi.update(user.id, updateData);
-      const updatedUser = response.data.data;
+      const updatedUser = response?.data?.data;
+      
+      if (!updatedUser) {
+        throw new Error('Failed to update user');
+      }
       
       setUserData(updatedUser);
       setEditing(false);
@@ -124,7 +133,12 @@ const ProfilePage = () => {
         },
       });
 
-      const updatedUser = response.data.data;
+      const updatedUser = response?.data?.data;
+      
+      if (!updatedUser) {
+        throw new Error('Failed to update profile image');
+      }
+      
       setUserData(updatedUser);
       setImageKey(prev => prev + 1);
       

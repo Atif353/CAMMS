@@ -20,7 +20,9 @@ const SettingsPage = () => {
   const fetchSettings = async () => {
     try {
       const response = await settingApi.getAll();
-      setSettings({ ...settings, ...response.data.data });
+      if (response?.data?.data) {
+        setSettings({ ...settings, ...response.data.data });
+      }
     } catch (error) {
       toast.error('Failed to fetch settings');
     } finally {

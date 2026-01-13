@@ -88,9 +88,15 @@ const LogActivityPage = () => {
         }
       });
 
+      const timeSpent = parseInt(formData.timeSpentMinutes) || 0;
+      if (timeSpent <= 0) {
+        toast.error('Time spent must be greater than 0');
+        return;
+      }
+      
       await activityApi.create({
         ...formData,
-        timeSpentMinutes: parseInt(formData.timeSpentMinutes),
+        timeSpentMinutes: timeSpent,
         meta,
       });
 

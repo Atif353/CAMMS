@@ -40,30 +40,36 @@ const EditActivityPage = () => {
     try {
       setLoading(true);
       const response = await activityApi.getById(id);
-      const activity = response.data.data;
+      const activity = response?.data?.data;
       
-      const activityDate = activity.activityDate.includes('T') 
+      if (!activity) {
+        throw new Error('Activity not found');
+      }
+      
+      const activityDate = activity.activityDate && activity.activityDate.includes('T') 
         ? activity.activityDate.split('T')[0] 
-        : activity.activityDate;
+        : activity.activityDate || new Date().toISOString().split('T')[0];
       
       setFormData({
-        activityType: activity.activityType,
-        title: activity.title,
+        activityType: activity.activityType || 'MDB_REPLY',
+        title: activity.title || '',
         description: activity.description || '',
         courseCode: activity.courseCode || '',
-        timeSpentMinutes: activity.timeSpentMinutes,
+        timeSpentMinutes: activity.timeSpentMinutes || 0,
         activityDate: activityDate,
-        status: activity.status,
+        status: activity.status || 'COMPLETED',
         meta: activity.meta || {},
       });
 
       setTimeout(() => {
-        Object.entries(activity.meta || {}).forEach(([key, value]) => {
-          const input = document.getElementById(`meta_${key}`);
-          if (input) {
-            input.value = value;
-          }
-        });
+        if (activity.meta && typeof activity.meta === 'object') {
+          Object.entries(activity.meta).forEach(([key, value]) => {
+            const input = document.getElementById(`meta_${key}`);
+            if (input && value !== null && value !== undefined) {
+              input.value = value;
+            }
+          });
+        }
       }, 100);
     } catch (error) {
       toast.error('Failed to load activity');
@@ -89,9 +95,15 @@ const EditActivityPage = () => {
         }
       });
 
+      const timeSpent = parseInt(formData.timeSpentMinutes) || 0;
+      if (timeSpent < 0) {
+        toast.error('Time spent cannot be negative');
+        return;
+      }
+      
       await activityApi.update(id, {
         ...formData,
-        timeSpentMinutes: parseInt(formData.timeSpentMinutes),
+        timeSpentMinutes: timeSpent,
         meta,
       });
 

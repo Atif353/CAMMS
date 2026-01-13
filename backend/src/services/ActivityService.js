@@ -46,7 +46,8 @@ export const ActivityService = {
   },
 
   async getActivitiesByInstructor(instructorId, filters = {}) {
-    const activities = await ActivityModel.findByInstructor(instructorId, filters);
+    const finalInstructorId = filters.getAll ? null : instructorId;
+    const activities = await ActivityModel.findByInstructor(finalInstructorId, filters);
     return activities.map((activity) => ({
       id: activity.id,
       activityType: activity.activity_type_code,
@@ -105,12 +106,25 @@ export const ActivityService = {
     if (updateData.meta !== undefined) updatePayload.meta = updateData.meta;
     if (updateData.status !== undefined) updatePayload.status = updateData.status;
 
+    if (updateData.activityType !== undefined) {
+      const activityTypeRecord = await ActivityTypeModel.findByCode(updateData.activityType);
+      if (!activityTypeRecord) {
+        throw new Error('Invalid activity type');
+      }
+      updatePayload.activity_type_id = activityTypeRecord.id;
+    }
+
     const activity = await ActivityModel.update(id, updatePayload);
     const activityType = await ActivityTypeModel.findById(activity.activity_type_id);
+
+    if (!activityType) {
+      throw new Error('Activity type not found');
+    }
 
     return {
       id: activity.id,
       activityType: activityType.code,
+      activityTypeLabel: activityType.label,
       title: activity.title,
       description: activity.description,
       courseCode: activity.course_code,
@@ -139,7 +153,8 @@ export const ActivityService = {
   },
 
   async countActivities(instructorId, filters = {}) {
-    return await ActivityModel.countByInstructor(instructorId, filters);
+    const finalInstructorId = filters.getAll ? null : instructorId;
+    return await ActivityModel.countByInstructor(finalInstructorId, filters);
   },
 };
 

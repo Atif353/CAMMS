@@ -118,28 +118,6 @@ router.get('/', ReportController.getReports);
 
 /**
  * @swagger
- * /reports/{id}:
- *   get:
- *     summary: Get report by ID
- *     tags: [Reports]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Report details
- *       404:
- *         description: Report not found
- */
-router.get('/:id', ReportController.getReportById);
-
-/**
- * @swagger
  * /reports/{id}/download:
  *   get:
  *     summary: Download report file
@@ -162,6 +140,28 @@ router.get('/:id', ReportController.getReportById);
  *               format: binary
  */
 router.get('/:id/download', ReportController.downloadReport);
+
+/**
+ * @swagger
+ * /reports/{id}:
+ *   get:
+ *     summary: Get report by ID
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Report details
+ *       404:
+ *         description: Report not found
+ */
+router.get('/:id', ReportController.getReportById);
 
 /**
  * @swagger

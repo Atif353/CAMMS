@@ -62,8 +62,8 @@ const ActivitiesListPage = () => {
       if (filters.search) params.search = filters.search;
 
       const response = await activityApi.getAll(params);
-      setActivities(response.data.data);
-      if (response.data.pagination) {
+      setActivities(response?.data?.data || []);
+      if (response?.data?.pagination) {
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -268,7 +268,7 @@ const ActivitiesListPage = () => {
                     </td>
                   </tr>
                 ) : (
-                  activities.map((activity) => (
+                  (activities || []).map((activity) => (
                     <tr key={activity.id} className="hover:bg-blue-50 dark:hover:bg-gray-700/50 transition-colors duration-200 group">
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">

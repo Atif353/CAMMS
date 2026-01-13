@@ -34,9 +34,10 @@ const AdminReportsPage = () => {
   const fetchInstructors = async () => {
     try {
       const response = await userApi.getInstructors();
-      setInstructors(response.data.data);
+      setInstructors(response?.data?.data || []);
     } catch (error) {
       console.error('Error fetching instructors:', error);
+      setInstructors([]);
     }
   };
 
@@ -44,8 +45,8 @@ const AdminReportsPage = () => {
     setLoadingReports(true);
     try {
       const response = await reportApi.getAll({ page: currentPage, limit: 10 });
-      setPreviousReports(response.data.data || []);
-      if (response.data.pagination) {
+      setPreviousReports(response?.data?.data || []);
+      if (response?.data?.pagination) {
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -70,8 +71,8 @@ const AdminReportsPage = () => {
       
       const response = await reportApi.generate(dataToGenerate);
 
-      if (response.isJson && response.data.success) {
-        const jsonData = JSON.stringify(response.data.data, null, 2);
+      if (response.isJson && response?.data?.success) {
+        const jsonData = JSON.stringify(response?.data?.data || {}, null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -83,7 +84,7 @@ const AdminReportsPage = () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
 
-        toast.warning(response.data.message || 'Report downloaded as JSON (Python service unavailable)');
+        toast.warning(response?.data?.message || 'Report downloaded as JSON (Python service unavailable)');
       } else {
         const blob = response.data;
         const url = window.URL.createObjectURL(blob);
@@ -275,7 +276,7 @@ const AdminReportsPage = () => {
                   className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
                 >
                   <option value="">All Instructors</option>
-                  {instructors.map((instructor) => (
+                  {(instructors || []).map((instructor) => (
                     <option key={instructor.id} value={instructor.id}>
                       {instructor.name} ({instructor.email})
                     </option>
@@ -372,7 +373,7 @@ const AdminReportsPage = () => {
               <span>Report Summary</span>
             </h2>
             <div className="space-y-6">
-              {reportData.instructorSummary?.map((instructor) => (
+              {(reportData.instructorSummary || []).map((instructor) => (
                 <div
                   key={instructor.instructorId}
                   className="bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-xl p-6 border border-blue-100 hover:shadow-lg transition-all duration-300"
@@ -461,7 +462,7 @@ const AdminReportsPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
-                  {previousReports.map((report) => (
+                  {(previousReports || []).map((report) => (
                     <tr key={report.id} className="hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">

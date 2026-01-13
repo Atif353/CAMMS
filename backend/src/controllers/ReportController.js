@@ -10,8 +10,12 @@ export const ReportController = {
   async generateReport(req, res, next) {
     try {
       const outputFormat = req.body.format || 'pdf';
+      const reportType = req.body.reportType && req.body.reportType.trim() !== '' 
+        ? req.body.reportType.trim() 
+        : null;
+      
       const reportData = {
-        reportType: req.body.reportType || null,
+        reportType,
         instructorId: req.user.role === 'ADMIN' ? req.body.instructorId || null : req.user.id,
         startDate: req.body.startDate || null,
         endDate: req.body.endDate || null,
@@ -99,8 +103,8 @@ export const ReportController = {
   async getReports(req, res, next) {
     try {
       const { reportType, instructorId, page = 1, limit = 10 } = req.query;
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = Math.max(1, parseInt(page) || 1);
+      const limitNum = Math.max(1, Math.min(100, parseInt(limit) || 10));
       const offset = (pageNum - 1) * limitNum;
 
       const filters = {
@@ -131,6 +135,12 @@ export const ReportController = {
 
   async getReportById(req, res, next) {
     try {
+      if (!req.params.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Report ID is required',
+        });
+      }
       const report = await ReportService.getReportById(req.params.id);
       res.status(200).json({
         success: true,
@@ -143,6 +153,12 @@ export const ReportController = {
 
   async downloadReport(req, res, next) {
     try {
+      if (!req.params.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Report ID is required',
+        });
+      }
       const report = await ReportService.getReportById(req.params.id);
       
       if (!report.filePath) {
@@ -152,7 +168,13 @@ export const ReportController = {
         });
       }
 
-      const filePath = path.join(__dirname, '../../..', report.filePath);
+      let filePath;
+      if (report.filePath.startsWith('uploads/')) {
+        filePath = path.join(__dirname, '../../..', report.filePath);
+      } else {
+        const uploadsDir = path.join(__dirname, '../../..', 'uploads');
+        filePath = path.join(uploadsDir, path.basename(report.filePath));
+      }
 
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({
@@ -170,6 +192,7 @@ export const ReportController = {
 
       res.setHeader('Content-Type', mimeType);
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', fileBuffer.length);
       res.send(fileBuffer);
     } catch (error) {
       next(error);
@@ -178,6 +201,12 @@ export const ReportController = {
 
   async deleteReport(req, res, next) {
     try {
+      if (!req.params.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Report ID is required',
+        });
+      }
       await ReportService.deleteReport(req.params.id, req.user.id, req.user.role);
       res.status(200).json({
         success: true,

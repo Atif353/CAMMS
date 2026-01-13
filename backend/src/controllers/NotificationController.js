@@ -7,7 +7,7 @@ export const NotificationController = {
       const notifications = await NotificationService.getNotificationsForUser(req.user.id, {
         isRead: isRead === 'true' ? true : isRead === 'false' ? false : undefined,
         type,
-        limit: limit ? parseInt(limit) : undefined,
+        limit: limit ? Math.max(1, Math.min(100, parseInt(limit) || undefined)) : undefined,
       });
       res.status(200).json({
         success: true,
@@ -20,6 +20,12 @@ export const NotificationController = {
 
   async markAsRead(req, res, next) {
     try {
+      if (!req.params.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Notification ID is required',
+        });
+      }
       const result = await NotificationService.markAsRead(req.params.id, req.user.id);
       res.status(200).json({
         success: true,

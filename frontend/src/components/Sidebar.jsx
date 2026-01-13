@@ -76,7 +76,7 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
   const fetchUnreadCount = async () => {
     try {
       const response = await notificationApi.getUnreadCount();
-      setUnreadCount(response.data.data.count || 0);
+      setUnreadCount(response?.data?.data?.count || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
@@ -151,7 +151,7 @@ const Sidebar = ({ onToggle, mobileOpen, setMobileOpen }) => {
 
         <nav className="flex-1 p-3 overflow-y-auto">
           <div className="space-y-1">
-            {menuItems.map((item) => {
+            {(menuItems || []).map((item) => {
               const Icon = item.icon;
               const isNotifications = item.path === '/instructor/notifications';
               const showBadge = isNotifications && unreadCount > 0;

@@ -1,7 +1,8 @@
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  if (totalPages <= 1) return null;
+  if (!totalPages || totalPages <= 1) return null;
+  if (!currentPage || currentPage < 1) return null;
 
   const pages = [];
   const maxVisible = 5;

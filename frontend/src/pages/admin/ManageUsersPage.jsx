@@ -47,8 +47,8 @@ const ManageUsersPage = () => {
       const params = { page: currentPage, limit: 10 };
       if (searchTerm) params.search = searchTerm;
       const response = await userApi.getAll(params);
-      setUsers(response.data.data);
-      if (response.data.pagination) {
+      setUsers(response?.data?.data || []);
+      if (response?.data?.pagination) {
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -189,7 +189,7 @@ const ManageUsersPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {users.map((user) => (
+                {(users || []).map((user) => (
                   <tr key={user.id} className="hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200">
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2 sm:space-x-3">

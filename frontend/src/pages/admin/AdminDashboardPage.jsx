@@ -51,9 +51,10 @@ const AdminDashboardPage = () => {
   const fetchDashboard = async () => {
     try {
       const response = await dashboardApi.getAdmin({ dateRange });
-      setDashboard(response.data.data);
+      setDashboard(response?.data?.data || null);
     } catch (error) {
       console.error('Error fetching dashboard:', error);
+      setDashboard(null);
     } finally {
       setLoading(false);
     }
@@ -401,7 +402,7 @@ const AdminDashboardPage = () => {
                   paddingAngle={3}
                   animationDuration={1000}
                 >
-                  {chartData.map((entry, index) => (
+                  {(chartData || []).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={COLORS[index % COLORS.length]}
@@ -443,7 +444,7 @@ const AdminDashboardPage = () => {
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">Top Active Instructors</h3>
             </div>
             <div className="space-y-3">
-              {dashboard?.topInstructors?.map((instructor, index) => (
+              {(dashboard?.topInstructors || []).map((instructor, index) => (
                 <div
                   key={instructor.id}
                   className="flex items-center justify-between p-4 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl border-2 border-gray-100 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200"

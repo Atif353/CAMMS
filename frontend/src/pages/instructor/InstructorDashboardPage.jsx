@@ -52,9 +52,10 @@ const InstructorDashboardPage = () => {
   const fetchDashboard = async () => {
     try {
       const response = await dashboardApi.getInstructor({ dateRange });
-      setDashboard(response.data.data);
+      setDashboard(response?.data?.data || null);
     } catch (error) {
       console.error('Error fetching dashboard:', error);
+      setDashboard(null);
     } finally {
       setLoading(false);
     }
@@ -133,6 +134,7 @@ const InstructorDashboardPage = () => {
   };
 
   const pieChartData = useMemo(() => {
+    if (!dashboard?.activityTypeCount) return [];
     if (!dashboard?.activityTypeCount) return [];
     return Object.entries(dashboard.activityTypeCount).map(([type, count]) => {
       const fullName = type.replace(/_/g, ' ');
@@ -393,7 +395,7 @@ const InstructorDashboardPage = () => {
                   paddingAngle={3}
                   animationDuration={1000}
                 >
-                  {pieChartData.map((entry, index) => (
+                  {(pieChartData || []).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={COLORS[index % COLORS.length]}

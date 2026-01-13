@@ -2,11 +2,15 @@ import prisma from "../config/prisma.js";
 
 export const ReportModel = {
   async create(reportData) {
+    const normalizedReportType = reportData.reportType && reportData.reportType.trim() !== "" 
+      ? reportData.reportType.trim() 
+      : "CUSTOM";
+    
     const report = await prisma.report.create({
       data: {
         generatedBy: reportData.generatedBy,
         instructorId: reportData.instructorId || null,
-        reportType: reportData.reportType,
+        reportType: normalizedReportType,
         startDate: new Date(reportData.startDate),
         endDate: new Date(reportData.endDate),
         filters: reportData.filters || {},
@@ -166,11 +170,8 @@ export const ReportModel = {
       endDate: endDateNormalized,
     };
 
-    if (reportType) {
-      where.reportType = reportType;
-    } else {
-      where.reportType = null;
-    }
+    const normalizedReportType = reportType && reportType.trim() !== "" ? reportType.trim() : "CUSTOM";
+    where.reportType = normalizedReportType;
 
     if (instructorId) {
       where.instructorId = instructorId;

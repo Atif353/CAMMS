@@ -121,6 +121,8 @@ export const ReportService = {
       summarySnapshot: summary,
     };
 
+    const normalizedReportType = reportType && reportType.trim() !== "" ? reportType.trim() : "CUSTOM";
+
     const reportRecord = await prisma.$transaction(async (tx) => {
       const thirtySecondsAgo = new Date(Date.now() - 30000);
       const startDateNormalized = new Date(summary.startDate);
@@ -133,7 +135,7 @@ export const ReportService = {
         createdAt: { gte: thirtySecondsAgo },
         startDate: startDateNormalized,
         endDate: endDateNormalized,
-        reportType: reportType || null,
+        reportType: normalizedReportType,
         instructorId: instructorId || null,
       };
 
@@ -160,7 +162,7 @@ export const ReportService = {
         data: {
           generatedBy: userId,
           instructorId: instructorId || null,
-          reportType: reportType || null,
+          reportType: normalizedReportType,
           startDate: new Date(summary.startDate),
           endDate: new Date(summary.endDate),
           filters: mergedFilters,
@@ -228,9 +230,10 @@ export const ReportService = {
     if (reportId) {
       reportRecord = { id: reportId };
     } else {
+      const normalizedReportType = reportType && reportType.trim() !== "" ? reportType.trim() : "CUSTOM";
       const existing = await ReportModel.findRecentDuplicate({
         generatedBy: userId,
-        reportType: reportType || null,
+        reportType: normalizedReportType,
         startDate: summary.startDate,
         endDate: summary.endDate,
         instructorId: instructorId || null,
@@ -261,16 +264,14 @@ export const ReportService = {
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const extension = outputFormat.toLowerCase() === "excel" ? "xlsx" : "pdf";
-      const reportTypeLabel = reportType || "CUSTOM";
-      const filename = `report_${reportTypeLabel}_${timestamp}.${extension}`;
+      const normalizedReportType = reportType && reportType.trim() !== "" ? reportType.trim() : "CUSTOM";
+      const filename = `report_${normalizedReportType}_${timestamp}.${extension}`;
       const filePath = path.join(uploadsDir, filename);
 
       if (saveToDisk) {
         fs.writeFileSync(filePath, fileBuffer);
-        await ReportModel.updateFilePath(
-          reportRecord.id,
-          `uploads/${filename}`
-        );
+        const relativePath = `uploads/${filename}`;
+        await ReportModel.updateFilePath(reportRecord.id, relativePath);
       }
 
       return {
@@ -367,7 +368,13 @@ export const ReportService = {
     }
 
     if (report.file_path) {
-      const filePath = path.join(__dirname, "../../../", report.file_path);
+      let filePath;
+      if (report.file_path.startsWith("uploads/")) {
+        filePath = path.join(__dirname, "../../../", report.file_path);
+      } else {
+        filePath = path.join(uploadsDir, path.basename(report.file_path));
+      }
+      
       if (fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);

@@ -95,7 +95,15 @@ export const UserService = {
     const user = await UserModel.update(id, updatePayload);
     const roleRecord = await RoleModel.findById(user.role_id);
 
+    if (!roleRecord) {
+      throw new Error('Role not found');
+    }
+
     const updatedUser = await UserModel.findById(user.id);
+    if (!updatedUser) {
+      throw new Error('User not found after update');
+    }
+
     return {
       id: updatedUser.id,
       name: updatedUser.name,

@@ -24,7 +24,7 @@ const NotificationsPage = () => {
       if (filter === 'read') params.isRead = 'true';
 
       const response = await notificationApi.getAll(params);
-      setNotifications(response.data.data);
+      setNotifications(response?.data?.data || []);
     } catch (error) {
       toast.error('Failed to fetch notifications');
     } finally {
@@ -115,7 +115,7 @@ const NotificationsPage = () => {
         </div>
 
         <div className="space-y-4">
-          {notifications.map((notification, index) => {
+          {(notifications || []).map((notification, index) => {
             const isLastItem = index === notifications.length - 1;
             const isFirstItem = index === 0;
             

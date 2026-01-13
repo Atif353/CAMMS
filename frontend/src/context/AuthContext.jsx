@@ -35,7 +35,13 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authApi.login({ email, password });
-      const { accessToken, user: userData } = response.data.data;
+      const loginData = response?.data?.data;
+      
+      if (!loginData || !loginData.accessToken || !loginData.user) {
+        throw new Error('Invalid login response');
+      }
+      
+      const { accessToken, user: userData } = loginData;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('user', JSON.stringify(userData));

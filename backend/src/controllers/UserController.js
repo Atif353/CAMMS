@@ -17,8 +17,8 @@ export const UserController = {
   async getAllUsers(req, res, next) {
     try {
       const { role, search, page = 1, limit = 10 } = req.query;
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = Math.max(1, parseInt(page) || 1);
+      const limitNum = Math.max(1, Math.min(100, parseInt(limit) || 10));
       const offset = (pageNum - 1) * limitNum;
 
       const users = await UserService.getAllUsers({
@@ -47,6 +47,12 @@ export const UserController = {
 
   async getUserById(req, res, next) {
     try {
+      if (!req.params.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'User ID is required',
+        });
+      }
       const user = await UserService.getUserById(req.params.id);
       res.status(200).json({
         success: true,
@@ -72,6 +78,12 @@ export const UserController = {
 
   async deleteUser(req, res, next) {
     try {
+      if (!req.params.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'User ID is required',
+        });
+      }
       const result = await UserService.deleteUser(req.params.id);
       res.status(200).json({
         success: true,

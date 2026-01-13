@@ -31,8 +31,8 @@ const InstructorReportsPage = () => {
     setLoadingReports(true);
     try {
       const response = await reportApi.getAll({ page: currentPage, limit: 10 });
-      setPreviousReports(response.data.data || []);
-      if (response.data.pagination) {
+      setPreviousReports(response?.data?.data || []);
+      if (response?.data?.pagination) {
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -330,7 +330,7 @@ const InstructorReportsPage = () => {
               <FiFileText className="text-blue-600" />
               <span>Report Summary</span>
             </h2>
-            {reportData.instructorSummary?.map((instructor) => (
+            {(reportData.instructorSummary || []).map((instructor) => (
               <div
                 key={instructor.instructorId}
                 className="bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-xl p-6 border border-blue-100"
@@ -353,7 +353,7 @@ const InstructorReportsPage = () => {
                 <div className="mt-4">
                   <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Activity Breakdown:</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {Object.entries(instructor.totals || {}).map(([type, stats]) => (
+                    {instructor.totals && Object.entries(instructor.totals).map(([type, stats]) => (
                       <div key={type} className="bg-gray-50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
                         <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
                           {type.replace(/_/g, ' ')}
@@ -401,7 +401,7 @@ const InstructorReportsPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
-                  {previousReports.map((report) => (
+                  {(previousReports || []).map((report) => (
                     <tr key={report.id} className="hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
