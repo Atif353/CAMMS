@@ -15,8 +15,8 @@ const LogActivityPage = () => {
     description: '',
     courseCode: '',
     timeSpentMinutes: '',
-    activityDate: new Date().toISOString().split('T')[0],
-    status: 'COMPLETED',
+    activityDate: '',
+    status: 'PENDING',
     meta: {},
   });
 
@@ -77,6 +77,24 @@ const LogActivityPage = () => {
     setLoading(true);
 
     try {
+      if (!formData.title || !formData.activityType || !formData.description) {
+        toast.error('Title, Activity Type, and Description are required');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.courseCode) {
+        toast.error('Course Code is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.activityDate) {
+        toast.error('Activity Date is required');
+        setLoading(false);
+        return;
+      }
+
       const meta = {};
       const fields = activityTypeFields[formData.activityType] || [];
       fields.forEach((field) => {
@@ -88,15 +106,17 @@ const LogActivityPage = () => {
         }
       });
 
-      const timeSpent = parseInt(formData.timeSpentMinutes) || 0;
-      if (timeSpent <= 0) {
-        toast.error('Time spent must be greater than 0');
-        return;
+      let finalStatus = formData.status;
+      if (!formData.title || !formData.activityType || !formData.description) {
+        finalStatus = 'PENDING';
       }
+
+      const timeSpent = parseInt(formData.timeSpentMinutes) || 0;
       
       await activityApi.create({
         ...formData,
         timeSpentMinutes: timeSpent,
+        status: finalStatus,
         meta,
       });
 
@@ -191,6 +211,7 @@ const LogActivityPage = () => {
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Description</label>
                 <textarea
+                  required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 text-gray-900 dark:text-white transition-all duration-300"
@@ -203,6 +224,7 @@ const LogActivityPage = () => {
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Course Code</label>
                 <input
                   type="text"
+                  required
                   value={formData.courseCode}
                   onChange={(e) => setFormData({ ...formData, courseCode: e.target.value })}
                   className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 text-gray-900 dark:text-white transition-all duration-300"
@@ -217,7 +239,6 @@ const LogActivityPage = () => {
                 </label>
                 <input
                   type="number"
-                  required
                   min="0"
                   value={formData.timeSpentMinutes}
                   onChange={(e) => setFormData({ ...formData, timeSpentMinutes: e.target.value })}

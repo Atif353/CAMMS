@@ -19,16 +19,21 @@ export const ActivityService = {
       throw new Error('Invalid activity type');
     }
 
+    let finalStatus = status;
+    if (!title || !activityType || !description) {
+      finalStatus = 'PENDING';
+    }
+
     const activity = await ActivityModel.create({
       instructorId,
       activityTypeId: activityTypeRecord.id,
       title,
       description,
       courseCode,
-      timeSpentMinutes,
+      timeSpentMinutes: timeSpentMinutes || 0,
       activityDate,
       meta: meta || {},
-      status: status || 'COMPLETED',
+      status: finalStatus || 'PENDING',
     });
 
     return {
@@ -46,8 +51,6 @@ export const ActivityService = {
   },
 
   async getActivitiesByInstructor(instructorId, filters = {}) {
-    // If instructorId is explicitly provided (not null/undefined), always use it (even for admins with getAll)
-    // If getAll is true and no instructorId provided, set to null to get all instructors
     const finalInstructorId = (instructorId !== null && instructorId !== undefined) ? instructorId : (filters.getAll ? null : instructorId);
     const activities = await ActivityModel.findByInstructor(finalInstructorId, filters);
     return activities.map((activity) => ({
@@ -155,8 +158,6 @@ export const ActivityService = {
   },
 
   async countActivities(instructorId, filters = {}) {
-    // If instructorId is explicitly provided (not null/undefined), always use it (even for admins with getAll)
-    // If getAll is true and no instructorId provided, set to null to get all instructors
     const finalInstructorId = (instructorId !== null && instructorId !== undefined) ? instructorId : (filters.getAll ? null : instructorId);
     return await ActivityModel.countByInstructor(finalInstructorId, filters);
   },

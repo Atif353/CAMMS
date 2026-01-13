@@ -19,9 +19,9 @@ const createActivitySchema = Joi.object({
     )
     .required(),
   title: Joi.string().min(3).max(200).required(),
-  description: Joi.string().max(1000),
-  courseCode: Joi.string().max(20),
-  timeSpentMinutes: Joi.number().integer().min(0).required(),
+  description: Joi.string().max(1000).required(),
+  courseCode: Joi.string().max(20).required(),
+  timeSpentMinutes: Joi.number().integer().min(0),
   activityDate: Joi.date().required(),
   meta: Joi.object(),
   status: Joi.string().valid('COMPLETED', 'PENDING'),
